@@ -118,12 +118,14 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    const query: Record<string, unknown> = {
-      status: "ready",
-    };
+    const query: Record<string, unknown> = {};
 
     if (creator) {
+      // Creator viewing their own videos — show all statuses
       query.creator = creator;
+    } else {
+      // Public feed — only show ready videos
+      query.status = "ready";
     }
 
     const [videos, total] = await Promise.all([

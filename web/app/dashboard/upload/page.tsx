@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import * as tus from 'tus-js-client'
+import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
 import { usePrivy } from '@privy-io/react-auth'
 import Button from '@/components/ui/Button'
@@ -9,23 +10,22 @@ import Button from '@/components/ui/Button'
 type UploadStatus = 'idle' | 'creating' | 'uploading' | 'processing' | 'done' | 'error'
 
 export default function UploadPage() {
-  const { user } = useAuth()
+  const { user }           = useAuth()
   const { getAccessToken } = usePrivy()
 
-  // Form state
-  const [title, setTitle]           = useState('')
+  const [title, setTitle]             = useState('')
   const [description, setDescription] = useState('')
-  const [access, setAccess]         = useState<'free' | 'premium'>('free')
-  const [tags, setTags]             = useState('')
-  const [file, setFile]             = useState<File | null>(null)
+  const [access, setAccess]           = useState<'free' | 'premium'>('free')
+  const [tags, setTags]               = useState('')
+  const [file, setFile]               = useState<File | null>(null)
 
-  // Upload state
-  const [status, setStatus]   = useState<UploadStatus>('idle')
-  const [progress, setProgress] = useState(0)
-  const [error, setError]     = useState<string | null>(null)
+  const [status, setStatus]       = useState<UploadStatus>('idle')
+  const [progress, setProgress]   = useState(0)
+  const [error, setError]         = useState<string | null>(null)
   const [playbackId, setPlaybackId] = useState<string | null>(null)
+  const [videoId, setVideoId]     = useState<string | null>(null)
 
-  const uploadRef = useRef<tus.Upload | null>(null)
+  const uploadRef   = useRef<tus.Upload | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleUpload = async () => {
@@ -34,11 +34,9 @@ export default function UploadPage() {
     setStatus('creating')
 
     try {
-      // Step 1: Get auth token
       const token = await getAccessToken()
       if (!token) throw new Error('Not authenticated')
 
-      // Step 2: Create asset on our backend
       const res = await fetch('/api/videos', {
         method: 'POST',
         headers: {
@@ -58,9 +56,9 @@ export default function UploadPage() {
 
       const { tusEndpoint, video } = data.data
       setPlaybackId(video.playbackId)
+      setVideoId(video._id)
       setStatus('uploading')
 
-      // Step 3: Upload file via TUS directly to Livepeer
       const upload = new tus.Upload(file, {
         endpoint: tusEndpoint,
         retryDelays: [0, 3000, 5000, 10000],
@@ -72,7 +70,7 @@ export default function UploadPage() {
           setProgress(Math.round((uploaded / total) * 100))
         },
         onSuccess: () => {
-          setStatus('processing')
+          setStatus('done')
           setProgress(100)
         },
         onError: (err: Error) => {
@@ -105,6 +103,7 @@ export default function UploadPage() {
     setTags('')
     setAccess('free')
     setPlaybackId(null)
+    setVideoId(null)
     setError(null)
   }
 
@@ -121,39 +120,30 @@ export default function UploadPage() {
         </p>
       </div>
 
-      {/* Success state */}
+      {/* ── Done state ── */}
       {status === 'done' && (
         <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-6 mb-6">
           <p className="font-medium text-green-400 mb-1">Upload complete!</p>
           <p className="text-sm text-text-muted mb-4">
-            Your video is being processed by Livepeer. It will be ready to watch shortly.
+            Your video is processing. It will be ready to watch in 1-3 minutes.
           </p>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <Button variant="primary" size="sm" onClick={handleReset}>
               Upload another
             </Button>
-            <a href={`/creator/${user?._id}`}>
-              <Button variant="secondary" size="sm">
-                View profile
+            {videoId && (
+              <Link href={`/video/${videoId}`}>
+                <Button variant="secondary" size="sm">
+                  View video →
+                </Button>
+              </Link>
+            )}
+            <Link href="/dashboard/videos">
+              <Button variant="ghost" size="sm">
+                My videos
               </Button>
-            </a>
+            </Link>
           </div>
-        </div>
-      )}
-
-      {/* Processing state */}
-      {status === 'processing' && (
-        <div className="rounded-xl border border-accent/20 bg-accent/5 p-6 mb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-            <p className="font-medium text-accent text-sm">Processing video...</p>
-          </div>
-          <p className="text-xs text-text-muted">
-            Livepeer is transcoding your video. This usually takes 1-3 minutes.
-          </p>
-          <p className="text-xs text-text-muted mt-2">
-            Playback ID: <span className="text-text-secondary font-mono">{playbackId}</span>
-          </p>
         </div>
       )}
 
@@ -255,7 +245,7 @@ export default function UploadPage() {
                   className="flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all disabled:opacity-50"
                   style={{
                     borderColor: access === opt ? 'var(--color-accent, #f5e642)' : 'var(--color-border, #1f1f1f)',
-                    background:  access === opt ? 'var(--color-accent, #f5e642)10' : 'var(--color-bg-elevated, #1a1a1a)',
+                    background:  access === opt ? '#f5e64215' : 'var(--color-bg-elevated, #1a1a1a)',
                     color:       access === opt ? 'var(--color-accent, #f5e642)' : 'var(--color-text-secondary, #a0a0a0)',
                   }}
                 >
@@ -307,7 +297,7 @@ export default function UploadPage() {
                 variant="primary"
                 size="md"
                 onClick={handleUpload}
-                disabled={!file || !title || status === 'processing'}
+                disabled={!file || !title}
                 loading={isUploading}
               >
                 Upload video
