@@ -1,0 +1,17 @@
+# Dependencies
+web/node_modules/
+
+# Next.js build output
+web/.next/
+web/out/
+
+# Secrets — never commit these
+web/.env.local
+web/.env
+
+# Mac
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
