@@ -3,71 +3,81 @@ import connectDB from '@/lib/mongodb'
 import Video from '@/models/Video'
 import Stream from '@/models/Stream'
 
-// POST /api/webhooks/livepeer
-// Livepeer calls this when asset status changes
-// No auth needed — Livepeer calls this directly
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { event, payload } = body
 
-    console.log('[Livepeer Webhook]', event, payload?.id)
+    // Livepeer sends different payload structure
+    // event is at top level, payload is the whole object
+    const event   = body.event
+    const payload = body.payload || body  // fallback to whole body
+
+    console.log('[Livepeer Webhook] Event:', event)
+    console.log('[Livepeer Webhook] Payload ID:', payload?.id)
 
     await connectDB()
 
     switch (event) {
-      // Video asset finished processing
       case 'asset.ready': {
+        const assetId = payload?.id || payload?.assetId
+        if (!assetId) break
+
         await Video.findOneAndUpdate(
-          { assetId: payload.id },
+          { assetId },
           {
-            status: 'ready',
-            duration: payload.videoSpec?.duration || 0,
-            // Livepeer returns duration after processing
+            status:   'ready',
+            duration: Math.round(payload?.videoSpec?.duration || payload?.duration || 0),
           }
         )
+        console.log('[Webhook] asset.ready → updated video', assetId)
         break
       }
 
-      // Video processing failed
       case 'asset.failed': {
+        const assetId = payload?.id || payload?.assetId
+        if (!assetId) break
+
         await Video.findOneAndUpdate(
-          { assetId: payload.id },
+          { assetId },
           { status: 'failed' }
         )
+        console.log('[Webhook] asset.failed → updated video', assetId)
         break
       }
 
-      // Stream went live
       case 'stream.started': {
+        const streamId = payload?.id || payload?.streamId
+        if (!streamId) break
+
         await Stream.findOneAndUpdate(
-          { streamId: payload.id },
+          { streamId },
           { status: 'live' }
         )
+        console.log('[Webhook] stream.started → updated stream', streamId)
         break
       }
 
-      // Stream went offline
       case 'stream.idle': {
+        const streamId = payload?.id || payload?.streamId
+        if (!streamId) break
+
         await Stream.findOneAndUpdate(
-          { streamId: payload.id },
+          { streamId },
           { status: 'ended' }
         )
+        console.log('[Webhook] stream.idle → updated stream', streamId)
         break
       }
 
       default:
-        console.log('[Livepeer Webhook] Unhandled event:', event)
+        console.log('[Webhook] Unhandled event:', event)
     }
 
-    // Always return 200 to Livepeer
-    // Otherwise Livepeer will retry the webhook
-    return NextResponse.json({ received: true })
+    return NextResponse.json({ received: true }, { status: 200 })
+
   } catch (error) {
-    console.error('[Livepeer Webhook Error]', error)
-    return NextResponse.json(
-      { error: 'Webhook processing failed' },
-      { status: 500 }
-    )
+    console.error('[Webhook Error]', error)
+    // Still return 200 so Livepeer doesn't keep retrying
+    return NextResponse.json({ received: true }, { status: 200 })
   }
 }
