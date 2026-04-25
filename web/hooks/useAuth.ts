@@ -1,20 +1,20 @@
-'use client'
+"use client";
 
-import { usePrivy } from '@privy-io/react-auth'
-import { useState, useEffect, useCallback } from 'react'
-import { IUser } from '@/types'
+import { usePrivy } from "@privy-io/react-auth";
+import { useState, useEffect, useCallback } from "react";
+import { IUser } from "@/types";
 
 interface UseAuthReturn {
   // Privy state
-  ready: boolean           // Privy SDK initialized
-  authenticated: boolean   // user is logged in
-  login: () => void        // open Privy login modal
-  logout: () => Promise<void>
+  ready: boolean; // Privy SDK initialized
+  authenticated: boolean; // user is logged in
+  login: () => void; // open Privy login modal
+  logout: () => Promise<void>;
 
   // Our DB user
-  user: IUser | null       // our MongoDB user object
-  isLoading: boolean       // fetching user from DB
-  syncUser: () => Promise<void>  // manually re-sync user
+  user: IUser | null; // our MongoDB user object
+  isLoading: boolean; // fetching user from DB
+  syncUser: () => Promise<void>; // manually re-sync user
 }
 
 export function useAuth(): UseAuthReturn {
@@ -25,69 +25,73 @@ export function useAuth(): UseAuthReturn {
     login,
     logout,
     getAccessToken,
-  } = usePrivy()
+  } = usePrivy();
 
-  const [user, setUser] = useState<IUser | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [user, setUser] = useState<IUser | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Sync Privy user to our MongoDB
   // Called after login or when we need fresh user data
   const syncUser = useCallback(async () => {
     if (!authenticated || !privyUser) {
-      setUser(null)
-      return
+      setUser(null);
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // Get Privy JWT token to verify with our backend
-      const token = await getAccessToken()
+      const token = await getAccessToken();
 
-      if (!token) throw new Error('No access token')
+      if (!token) throw new Error("No access token");
 
       // Extract user details from Privy user object
       // Privy stores linked accounts (email, phone, wallet)
-      const email = privyUser.email?.address
-      const phone = privyUser.phone?.number
-      const googleAccount = privyUser.google
-      const name = googleAccount?.name || ''
-      const avatar = (googleAccount as any)?.profilePictureUrl || ''
+      const email = privyUser.email?.address;
+      const phone = privyUser.phone?.number;
+      const googleAccount = privyUser.google;
+      const name =
+        googleAccount?.name ||
+        (email ? email.split("@")[0] : "") ||
+        (phone ? phone : "") ||
+        "";
+      const avatar = (googleAccount as any)?.profilePictureUrl || "";
 
       // Call our sync endpoint
-      const response = await fetch('/api/auth/sync', {
-        method: 'POST',
+      const response = await fetch("/api/auth/sync", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ email, phone, name, avatar }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
-        setUser(data.data)
+        setUser(data.data);
       } else {
-        console.error('User sync failed:', data.error)
-        setUser(null)
+        console.error("User sync failed:", data.error);
+        setUser(null);
       }
     } catch (error) {
-      console.error('useAuth syncUser error:', error)
-      setUser(null)
+      console.error("useAuth syncUser error:", error);
+      setUser(null);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [authenticated, privyUser, getAccessToken])
+  }, [authenticated, privyUser, getAccessToken]);
 
   // Auto-sync when auth state changes
   // When user logs in → sync to DB
   // When user logs out → clear user
   useEffect(() => {
     if (ready) {
-      syncUser()
+      syncUser();
     }
-  }, [ready, authenticated, syncUser])
+  }, [ready, authenticated, syncUser]);
 
   return {
     ready,
@@ -97,5 +101,5 @@ export function useAuth(): UseAuthReturn {
     user,
     isLoading,
     syncUser,
-  }
+  };
 }

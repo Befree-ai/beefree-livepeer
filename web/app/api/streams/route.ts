@@ -81,3 +81,43 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+// GET /api/streams?playbackId=xxx
+// Get stream info by playbackId
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const playbackId = searchParams.get("playbackId");
+
+    if (!playbackId) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: "playbackId is required" },
+        { status: 400 },
+      );
+    }
+
+    await connectDB();
+
+    const stream = await Stream.findOne({ playbackId })
+      .populate("creator", "name avatar subscriptionPrice")
+      .lean();
+
+    if (!stream) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: "Stream not found" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json<ApiResponse>({
+      success: true,
+      data: { stream },
+    });
+  } catch (error) {
+    console.error("[GET /api/streams]", error);
+    return NextResponse.json<ApiResponse>(
+      { success: false, error: "Failed to fetch stream" },
+      { status: 500 },
+    );
+  }
+}

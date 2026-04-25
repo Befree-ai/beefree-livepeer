@@ -55,7 +55,11 @@ export default function Navbar() {
           ) : authenticated ? (
             <>
               <Link
-                href={`/creator/${user?._id}`}
+                href={
+                  user?.role === "creator"
+                    ? `/creator/${user?._id}`
+                    : "/explore"
+                }
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:border-border-hover transition-all"
                 style={{
                   border: "1px solid var(--color-border)",
@@ -97,7 +101,9 @@ export default function Navbar() {
             </Button>
           ) : (
             <Link
-              href={`/creator/${user?._id}`}
+              href={
+                user?.role === "creator" ? `/creator/${user?._id}` : "/explore"
+              }
               className="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center"
             >
               <span className="text-xs font-semibold text-accent">
