@@ -34,6 +34,7 @@ export interface ICreator extends IUser {
     youtube?: string
   }
   totalEarnings: number    // in paise (₹1 = 100 paise)
+  subscriptionPrice: number
 }
 
 // ── Video ──────────────────────────────────────────

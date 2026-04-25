@@ -24,6 +24,8 @@ import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Badge from "@/components/ui/Badge";
 import { IVideo, ICreator } from "@/types";
+import { useAuth } from "@/hooks/useAuth";
+import { usePrivy } from "@privy-io/react-auth";
 
 // ── Sub-components ─────────────────────────────────────────────
 
@@ -374,6 +376,9 @@ export default function VideoPage() {
   const [src, setSrc] = useState<ReturnType<typeof getSrc>>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { getAccessToken } = usePrivy();
+  const [jwt, setJwt] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -386,12 +391,32 @@ export default function VideoPage() {
           return;
         }
         setVideo(data.data);
+
         const playbackRes = await fetch(
           `/api/playback/${data.data.playbackId}`,
         );
         const playbackData = await playbackRes.json();
-        if (playbackData.success) {
-          setSrc(getSrc(playbackData.data.playbackInfo));
+
+        if (data.data.access === "premium") {
+          // Premium — fetch JWT first, then set src together
+          const token = await getAccessToken();
+          if (token) {
+            const jwtRes = await fetch(`/api/videos/${id}/jwt`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const jwtData = await jwtRes.json();
+            if (jwtData.success) {
+              setJwt(jwtData.data.jwt);
+              if (playbackData.success) {
+                setSrc(getSrc(playbackData.data.playbackInfo));
+              }
+            }
+          }
+        } else {
+          // Free video — set src immediately
+          if (playbackData.success) {
+            setSrc(getSrc(playbackData.data.playbackInfo));
+          }
         }
       })
       .catch(() => setError("Failed to load video"))
@@ -441,7 +466,7 @@ export default function VideoPage() {
             style={{ background: "#000" }}
           >
             {src ? (
-              <Player.Root src={src} autoPlay volume={0}>
+              <Player.Root src={src} autoPlay volume={0} jwt={jwt ?? undefined}>
                 <Player.Container
                   style={{
                     width: "100%",

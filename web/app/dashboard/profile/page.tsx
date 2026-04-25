@@ -1,64 +1,80 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { usePrivy } from '@privy-io/react-auth'
-import Button from '@/components/ui/Button'
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { usePrivy } from "@privy-io/react-auth";
+import Button from "@/components/ui/Button";
 
 const GENRES = [
-  'Bollywood', 'Indie', 'Classical', 'Folk', 'Hip-Hop',
-  'Electronic', 'Jazz', 'Rock', 'Pop', 'Devotional',
-  'Ghazal', 'Sufi', 'Fusion', 'Instrumental', 'Other'
-]
+  "Bollywood",
+  "Indie",
+  "Classical",
+  "Folk",
+  "Hip-Hop",
+  "Electronic",
+  "Jazz",
+  "Rock",
+  "Pop",
+  "Devotional",
+  "Ghazal",
+  "Sufi",
+  "Fusion",
+  "Instrumental",
+  "Other",
+];
 
 export default function EditProfilePage() {
-  const { user, syncUser } = useAuth()
-  const { getAccessToken }  = usePrivy()
+  const { user, syncUser } = useAuth();
+  const { getAccessToken } = usePrivy();
 
-  const [name, setName]         = useState('')
-  const [bio, setBio]           = useState('')
-  const [genre, setGenre]       = useState<string[]>([])
-  const [instagram, setInstagram] = useState('')
-  const [twitter, setTwitter]   = useState('')
-  const [youtube, setYoutube]   = useState('')
+  const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
+  const [genre, setGenre] = useState<string[]>([]);
+  const [instagram, setInstagram] = useState("");
+  const [twitter, setTwitter] = useState("");
+  const [youtube, setYoutube] = useState("");
+  const [subscriptionPrice, setSubscriptionPrice] = useState("");
 
-  const [saving, setSaving]     = useState(false)
-  const [saved, setSaved]       = useState(false)
-  const [error, setError]       = useState<string | null>(null)
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Pre-fill form with existing user data
   useEffect(() => {
-    if (!user) return
-    setName(user.name || '')
-    setBio(user.bio || '')
+    if (!user) return;
+    setName(user.name || "");
+    setBio(user.bio || "");
     // genre and socialLinks are creator-only fields
     // cast to any to access them
-    const u = user as any
-    setGenre(u.genre || [])
-    setInstagram(u.socialLinks?.instagram || '')
-    setTwitter(u.socialLinks?.twitter || '')
-    setYoutube(u.socialLinks?.youtube || '')
-  }, [user])
+    const u = user as any;
+    setGenre(u.genre || []);
+    setInstagram(u.socialLinks?.instagram || "");
+    setTwitter(u.socialLinks?.twitter || "");
+    setYoutube(u.socialLinks?.youtube || "");
+    setSubscriptionPrice(
+      u.subscriptionPrice ? String(u.subscriptionPrice / 100) : "99",
+    );
+  }, [user]);
 
   const toggleGenre = (g: string) => {
     setGenre((prev) =>
-      prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]
-    )
-  }
+      prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g],
+    );
+  };
 
   const handleSave = async () => {
-    setSaving(true)
-    setError(null)
-    setSaved(false)
+    setSaving(true);
+    setError(null);
+    setSaved(false);
 
     try {
-      const token = await getAccessToken()
-      if (!token) throw new Error('Not authenticated')
+      const token = await getAccessToken();
+      if (!token) throw new Error("Not authenticated");
 
-      const res = await fetch('/api/profile', {
-        method: 'PATCH',
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
@@ -66,21 +82,22 @@ export default function EditProfilePage() {
           bio,
           genre,
           socialLinks: { instagram, twitter, youtube },
+          subscriptionPrice,
         }),
-      })
+      });
 
-      const data = await res.json()
-      if (!data.success) throw new Error(data.error || 'Failed to save')
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Failed to save");
 
-      await syncUser() // refresh user in context
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
+      await syncUser(); // refresh user in context
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to save')
+      setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   return (
     <div className="max-w-2xl">
@@ -88,13 +105,10 @@ export default function EditProfilePage() {
         <h1 className="font-display text-3xl font-semibold text-text-primary mb-1">
           Edit profile
         </h1>
-        <p className="text-text-muted text-sm">
-          Help fans discover you
-        </p>
+        <p className="text-text-muted text-sm">Help fans discover you</p>
       </div>
 
       <div className="flex flex-col gap-6">
-
         {/* Name */}
         <div>
           <label className="block text-sm font-medium text-text-primary mb-2">
@@ -142,14 +156,14 @@ export default function EditProfilePage() {
                 className="text-xs px-3 py-1.5 rounded-full border transition-all"
                 style={{
                   borderColor: genre.includes(g)
-                    ? 'var(--color-accent, #f5e642)'
-                    : 'var(--color-border, #1f1f1f)',
+                    ? "var(--color-accent, #f5e642)"
+                    : "var(--color-border, #1f1f1f)",
                   background: genre.includes(g)
-                    ? '#f5e64215'
-                    : 'var(--color-bg-elevated, #1a1a1a)',
+                    ? "#f5e64215"
+                    : "var(--color-bg-elevated, #1a1a1a)",
                   color: genre.includes(g)
-                    ? 'var(--color-accent, #f5e642)'
-                    : 'var(--color-text-secondary, #a0a0a0)',
+                    ? "var(--color-accent, #f5e642)"
+                    : "var(--color-text-secondary, #a0a0a0)",
                 }}
               >
                 {g}
@@ -165,9 +179,24 @@ export default function EditProfilePage() {
           </label>
           <div className="flex flex-col gap-3">
             {[
-              { label: 'Instagram', value: instagram, set: setInstagram, placeholder: 'instagram.com/yourhandle' },
-              { label: 'Twitter / X', value: twitter, set: setTwitter, placeholder: 'x.com/yourhandle' },
-              { label: 'YouTube', value: youtube, set: setYoutube, placeholder: 'youtube.com/@yourchannel' },
+              {
+                label: "Instagram",
+                value: instagram,
+                set: setInstagram,
+                placeholder: "instagram.com/yourhandle",
+              },
+              {
+                label: "Twitter / X",
+                value: twitter,
+                set: setTwitter,
+                placeholder: "x.com/yourhandle",
+              },
+              {
+                label: "YouTube",
+                value: youtube,
+                set: setYoutube,
+                placeholder: "youtube.com/@yourchannel",
+              },
             ].map((s) => (
               <div key={s.label} className="flex items-center gap-3">
                 <span className="text-xs text-text-muted w-20 flex-shrink-0">
@@ -192,6 +221,28 @@ export default function EditProfilePage() {
           </p>
         )}
 
+        {/* Subscription Price */}
+        <div>
+          <label className="block text-sm font-medium text-text-primary mb-2">
+            Subscription price (₹/month)
+          </label>
+          <div className="flex items-center gap-2">
+            <span className="text-text-muted text-sm">₹</span>
+            <input
+              type="number"
+              value={subscriptionPrice}
+              onChange={(e) => setSubscriptionPrice(e.target.value)}
+              placeholder="99"
+              min="1"
+              className="w-32 px-4 py-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-border-hover transition-colors"
+            />
+            <span className="text-text-muted text-xs">per month</span>
+          </div>
+          <p className="text-xs text-text-muted mt-1">
+            Fans pay this to unlock your premium content
+          </p>
+        </div>
+
         {/* Save */}
         <div className="flex items-center gap-3">
           <Button
@@ -202,12 +253,9 @@ export default function EditProfilePage() {
           >
             Save changes
           </Button>
-          {saved && (
-            <p className="text-sm text-green-400">✓ Saved!</p>
-          )}
+          {saved && <p className="text-sm text-green-400">✓ Saved!</p>}
         </div>
-
       </div>
     </div>
-  )
+  );
 }

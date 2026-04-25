@@ -20,6 +20,7 @@ export interface IUserDocument extends Document {
     youtube?: string
   }
   totalEarnings: number
+  subscriptionPrice: number
   createdAt: Date
   updatedAt: Date
 }
@@ -92,6 +93,11 @@ const UserSchema = new Schema<IUserDocument>(
     totalEarnings: {
       type: Number,
       default: 0,
+      min: 0,
+    },
+    subscriptionPrice: {
+      type: Number,
+      default: 9900,
       min: 0,
     },
   },
