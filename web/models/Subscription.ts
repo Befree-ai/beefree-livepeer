@@ -27,8 +27,8 @@ const SubscriptionSchema = new Schema<ISubscriptionDocument>(
     },
     status: {
       type: String,
-      enum: ["active", "expired", "cancelled"],
-      default: "active",
+      enum: ["pending", "active", "expired", "cancelled"],
+      default: "pending",
     },
     planType: {
       type: String,

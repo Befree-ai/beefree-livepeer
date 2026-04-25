@@ -1,7 +1,7 @@
 // ── User ──────────────────────────────────────────
 export type UserRole = "fan" | "creator"
 export type PlanType = "monthly" | "yearly"
-export type SubscriptionStatus = "active" | "expired" | "cancelled"
+export type SubscriptionStatus = "pending" | "active" | "expired" | "cancelled"
 export type VideoAccess = "free" | "premium"
 export type VideoStatus = "uploading" | "processing" | "ready" | "failed"
 export type StreamStatus = "idle" | "live" | "ended"
