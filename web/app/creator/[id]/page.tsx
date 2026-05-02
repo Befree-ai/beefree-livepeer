@@ -122,6 +122,8 @@ export default function CreatorProfilePage() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
   const [subscribeError, setSubscribeError] = useState<string | null>(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   // Load creator + videos
   useEffect(() => {
@@ -158,6 +160,22 @@ export default function CreatorProfilePage() {
         .then((r) => r.json())
         .then((data) => {
           if (data.success) setIsSubscribed(data.data.subscribed);
+        });
+    });
+  }, [user, id]);
+
+  // Check follow status
+  useEffect(() => {
+    if (!user || !id || user._id === id) return;
+
+    getAccessToken().then((token) => {
+      if (!token) return;
+      fetch(`/api/follow/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success) setIsFollowing(data.data.isFollowing);
         });
     });
   }, [user, id]);
@@ -271,6 +289,40 @@ export default function CreatorProfilePage() {
     });
   };
 
+  const handleFollow = async () => {
+    if (!user) {
+      login();
+      return;
+    }
+
+    setFollowLoading(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+
+      const method = isFollowing ? "DELETE" : "POST";
+      const res = await fetch(`/api/follow/${id}`, {
+        method,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsFollowing(data.data.isFollowing);
+        // Update follower count in UI
+        setCreator((prev) =>
+          prev
+            ? {
+                ...prev,
+                followersCount: prev.followersCount + (isFollowing ? -1 : 1),
+              }
+            : prev,
+        );
+      }
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -352,9 +404,36 @@ export default function CreatorProfilePage() {
                 )}
               </div>
 
-              <p className="text-text-muted text-sm mb-3">
-                {creator.followersCount} followers
-              </p>
+              <div className="flex items-center gap-3 mb-3">
+                <p className="text-text-muted text-sm">
+                  {creator.followersCount} followers
+                </p>
+                {/* Don't show follow button on own profile */}
+                {user?._id !== id && (
+                  <button
+                    onClick={handleFollow}
+                    disabled={followLoading}
+                    className="text-xs px-3 py-1 rounded-full border transition-all"
+                    style={{
+                      borderColor: isFollowing
+                        ? "var(--color-border)"
+                        : "var(--color-accent)",
+                      background: isFollowing ? "transparent" : "#f5e64215",
+                      color: isFollowing
+                        ? "var(--color-text-muted)"
+                        : "var(--color-accent)",
+                      cursor: followLoading ? "not-allowed" : "pointer",
+                      opacity: followLoading ? 0.6 : 1,
+                    }}
+                  >
+                    {followLoading
+                      ? "..."
+                      : isFollowing
+                        ? "Following"
+                        : "+ Follow"}
+                  </button>
+                )}
+              </div>
 
               {creator.bio && (
                 <p className="text-text-secondary text-sm max-w-xl mb-4">

@@ -1,28 +1,29 @@
-import mongoose, { Schema, Document } from "mongoose"
-import { UserRole } from "@/types"
+import mongoose, { Schema, Document } from "mongoose";
+import { UserRole } from "@/types";
 
 export interface IUserDocument extends Document {
-  privyId: string
-  email?: string
-  phone?: string
-  name?: string
-  avatar?: string
-  role: UserRole
-  bio?: string
-  followersCount: number
-  followingCount: number
-  isBanned: boolean
-  isVerified: boolean
-  genre?: string[]
+  privyId: string;
+  email?: string;
+  phone?: string;
+  name?: string;
+  avatar?: string;
+  role: UserRole;
+  bio?: string;
+  followersCount: number;
+  followingCount: number;
+  following: string[];
+  isBanned: boolean;
+  isVerified: boolean;
+  genre?: string[];
   socialLinks?: {
-    instagram?: string
-    twitter?: string
-    youtube?: string
-  }
-  totalEarnings: number
-  subscriptionPrice: number
-  createdAt: Date
-  updatedAt: Date
+    instagram?: string;
+    twitter?: string;
+    youtube?: string;
+  };
+  totalEarnings: number;
+  subscriptionPrice: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const UserSchema = new Schema<IUserDocument>(
@@ -35,12 +36,12 @@ const UserSchema = new Schema<IUserDocument>(
     },
     email: {
       type: String,
-      unique: true,    // no two users with same email
-      sparse: true,    // allows multiple null/undefined
+      unique: true, // no two users with same email
+      sparse: true, // allows multiple null/undefined
     },
     phone: {
       type: String,
-      unique: true,    // no two users with same phone
+      unique: true, // no two users with same phone
       sparse: true,
     },
     name: {
@@ -56,7 +57,7 @@ const UserSchema = new Schema<IUserDocument>(
       type: String,
       enum: ["fan", "creator"],
       default: "fan",
-      index: true,     // we query "all creators" frequently
+      index: true, // we query "all creators" frequently
     },
     bio: {
       type: String,
@@ -72,6 +73,10 @@ const UserSchema = new Schema<IUserDocument>(
       type: Number,
       default: 0,
       min: 0,
+    },
+    following: {
+      type: [String], // array of creator IDs
+      default: [],
     },
     isBanned: {
       type: Boolean,
@@ -103,8 +108,8 @@ const UserSchema = new Schema<IUserDocument>(
   },
   {
     timestamps: true,
-  }
-)
+  },
+);
 
 export default mongoose.models.User ||
-  mongoose.model<IUserDocument>("User", UserSchema)
+  mongoose.model<IUserDocument>("User", UserSchema);
