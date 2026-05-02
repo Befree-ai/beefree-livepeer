@@ -51,11 +51,16 @@ export async function POST(req: NextRequest) {
         role: "fan",
       });
     } else {
-      // Existing user — update name/avatar if empty
-      if (!user.name && body.name) {
+      // Update name/avatar/email if empty
+      const updates: Record<string, string> = {};
+      if (!user.name && body.name) updates.name = body.name;
+      if (!user.avatar && body.avatar) updates.avatar = body.avatar;
+      if (!user.email && body.email) updates.email = body.email;
+
+      if (Object.keys(updates).length > 0) {
         user = await User.findOneAndUpdate(
           { privyId },
-          { $set: { name: body.name, avatar: body.avatar || "" } },
+          { $set: updates },
           { new: true },
         );
       }

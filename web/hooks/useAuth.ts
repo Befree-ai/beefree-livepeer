@@ -48,7 +48,8 @@ export function useAuth(): UseAuthReturn {
 
       // Extract user details from Privy user object
       // Privy stores linked accounts (email, phone, wallet)
-      const email = privyUser.email?.address;
+      const email =
+        privyUser.email?.address || (privyUser.google as any)?.email || "";
       const phone = privyUser.phone?.number;
       const googleAccount = privyUser.google;
       const name =

@@ -100,11 +100,13 @@ export async function POST(req: NextRequest) {
     const subscription = await Subscription.create({
       fan: fan._id,
       creator: creator._id,
+      fanName: fan.name || fan.email || "",
+      creatorName: creator.name || "",
       status: "pending",
       planType: "monthly",
       razorpayOrderId: order.id,
       amount,
-      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     });
 
     return NextResponse.json<ApiResponse>({
