@@ -1,4 +1,125 @@
-# BeeFree — Technical Documentation
+# BeeFree
+
+**India-first decentralised creator platform. Artists keep 92–95% of what they earn.**
+
+YouTube pays creators ~55% of revenue. Spotify pays fractions of a cent per stream. BeeFree flips this — creators set their own subscription price, fans pay directly, and the creator keeps almost everything.
+
+---
+
+## What BeeFree Does
+
+BeeFree lets music artists and creators:
+
+- **Upload videos** — free or premium (subscribers only)
+- **Go live** — browser-based or OBS, free or premium streams
+- **Set a subscription price** — e.g. ₹99/month, ₹199/month, whatever they want
+- **Get paid directly** — fans pay via Razorpay (UPI, cards, netbanking)
+- **Gate premium content** — non-subscribers see a lock screen
+
+Fans can:
+- Browse creators on the Explore page
+- Subscribe to a creator for monthly access
+- Watch free content without subscribing
+- Watch premium videos and streams after subscribing
+
+---
+
+## The Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| Auth | Privy (email, SMS, Google, wallet) |
+| Database | MongoDB Atlas + Mongoose |
+| Video | Livepeer (upload, transcode, stream, CDN) |
+| Payments | Razorpay |
+| Deployment | Vercel |
+
+---
+
+## Quick Start
+
+```bash
+git clone https://github.com/Befree-ai/boc.git
+cd boc/web
+npm install
+cp .env.example .env.local
+# Fill in all env variables (see docs/DEPLOYMENT.md)
+npm run dev
+```
+
+Open `http://localhost:3000`
+
+---
+
+## Documentation
+
+| Document | What it covers |
+|----------|---------------|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Full technical architecture, data models, infrastructure map |
+| [docs/flows/AUTH_FLOW.md](docs/flows/AUTH_FLOW.md) | Login, signup, Privy JWT, MongoDB user sync |
+| [docs/flows/VIDEO_UPLOAD_FLOW.md](docs/flows/VIDEO_UPLOAD_FLOW.md) | TUS upload, Livepeer asset creation, webhook |
+| [docs/flows/VIDEO_PLAYBACK_FLOW.md](docs/flows/VIDEO_PLAYBACK_FLOW.md) | Free vs premium, Livepeer JWT gating |
+| [docs/flows/LIVESTREAM_FLOW.md](docs/flows/LIVESTREAM_FLOW.md) | Browser WebRTC, OBS/RTMP, stream viewer |
+| [docs/flows/SUBSCRIPTION_FLOW.md](docs/flows/SUBSCRIPTION_FLOW.md) | Razorpay order, payment verify, webhook |
+| [docs/flows/PREMIUM_ACCESS_FLOW.md](docs/flows/PREMIUM_ACCESS_FLOW.md) | JWT for premium videos + stream access control |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | How to deploy to production |
+
+---
+
+## Project Structure
+
+```
+beefree/
+├── contracts/          # Smart contracts (not implemented yet)
+├── scripts/            # Utility scripts
+├── docs/               # All documentation (you are here)
+└── web/                # Next.js application
+    ├── app/            # Pages + API routes
+    ├── components/     # UI components
+    ├── hooks/          # useAuth hook
+    ├── lib/            # MongoDB + Livepeer clients
+    ├── models/         # Mongoose models
+    └── types/          # TypeScript types
+```
+
+---
+
+## Current Status
+
+```
+✅ Auth (Google, Email OTP, SMS, Wallet)
+✅ Video upload with TUS resumable protocol
+✅ Free + premium videos
+✅ Livepeer JWT gating for premium videos
+✅ Browser livestreaming (WebRTC/WHIP)
+✅ OBS/RTMP livestreaming
+✅ Premium stream access control
+✅ Razorpay subscription payments (test mode)
+✅ Creator profile pages
+✅ Fan subscription management
+
+🔜 Subscription expiry cron job
+🔜 Earnings dashboard
+🔜 Follow/unfollow creators
+🔜 Admin panel for creator verification
+🔜 Smart contract integration
+```
+
+---
+
+## Going Live (Production)
+
+1. Switch Razorpay keys from `rzp_test_` to `rzp_live_`
+2. Complete Razorpay KYC
+3. Upgrade MongoDB Atlas from M0 to M10
+4. Upgrade Privy from Dev to Production plan
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for full checklist.
+
+<!-- # BeeFree — Technical Documentation
 
 ## Stack
 
@@ -935,4 +1056,4 @@ What's needed:
    Complete KYC + business registration
    Switch from test keys to live keys
    Configure webhook: /api/webhooks/razorpay
-```
+``` -->
