@@ -113,7 +113,7 @@ export default function CreatorProfilePage() {
   const params = useParams();
   const id = params?.id as string;
   const { user } = useAuth();
-  const { getAccessToken, login } = usePrivy();
+  const { getAccessToken, login, exportWallet } = usePrivy();
 
   const [creator, setCreator] = useState<ICreator | null>(null);
   const [videos, setVideos] = useState<IVideo[]>([]);
@@ -124,6 +124,8 @@ export default function CreatorProfilePage() {
   const [subscribeError, setSubscribeError] = useState<string | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+
+  const isOwnProfile = user?._id === id
 
   // Load creator + videos
   useEffect(() => {
@@ -378,6 +380,7 @@ export default function CreatorProfilePage() {
 
       <main className="flex-1 pt-16 w-full">
         <div className="max-w-6xl mx-auto px-6 py-12">
+
           {/* Creator Header */}
           <div className="flex items-start gap-6 mb-10 pb-10 border-b border-border">
             <div className="w-24 h-24 rounded-full bg-bg-elevated border border-border flex items-center justify-center flex-shrink-0">
@@ -489,6 +492,68 @@ export default function CreatorProfilePage() {
             </div>
           </div>
 
+          {/* Wallet — only show on own profile */}
+          {isOwnProfile && user?.walletAddress && (
+            <div className="mb-10 rounded-xl border border-border bg-bg-surface p-6">
+              <h2 className="font-display text-lg font-semibold text-text-primary mb-1">
+                Your BeeFree Wallet
+              </h2>
+              <p className="text-xs text-text-muted mb-4">
+                Your self-custodial Ethereum wallet — fully owned by you
+              </p>
+
+              <div className="flex items-center gap-3 flex-wrap">
+                {/* Address display */}
+                <div
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg flex-1 min-w-0"
+                  style={{
+                    background: "var(--color-bg-elevated)",
+                    border: "1px solid var(--color-border)",
+                  }}
+                >
+                  <span className="text-xs text-text-muted font-mono truncate">
+                    {user.walletAddress}
+                  </span>
+                </div>
+
+                {/* Copy button */}
+                <button
+                  onClick={() =>
+                    navigator.clipboard.writeText(user?.walletAddress || "")
+                  }
+                  className="text-xs px-3 py-2 rounded-lg transition-all flex-shrink-0"
+                  style={{
+                    border: "1px solid var(--color-border)",
+                    background: "transparent",
+                    color: "var(--color-text-secondary)",
+                    cursor: "pointer",
+                  }}
+                >
+                  Copy
+                </button>
+
+                {/* Export private key */}
+                <button
+                  onClick={exportWallet}
+                  className="text-xs px-3 py-2 rounded-lg transition-all flex-shrink-0"
+                  style={{
+                    border: "1px solid var(--color-accent)",
+                    background: "#f5e64210",
+                    color: "var(--color-accent)",
+                    cursor: "pointer",
+                  }}
+                >
+                  Export private key ↗
+                </button>
+              </div>
+
+              <p className="text-xs text-text-muted mt-3">
+                Export gives you full control — import into MetaMask or any
+                Ethereum wallet
+              </p>
+            </div>
+          )}
+
           {/* Videos */}
           <div>
             <h2 className="font-display text-2xl font-semibold text-text-primary mb-6">
@@ -512,6 +577,7 @@ export default function CreatorProfilePage() {
               </div>
             )}
           </div>
+
         </div>
       </main>
 

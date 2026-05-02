@@ -1,59 +1,61 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import Link from 'next/link'
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
-import Badge from '@/components/ui/Badge'
-import { useAuth } from '@/hooks/useAuth'
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import Badge from "@/components/ui/Badge";
+import { useAuth } from "@/hooks/useAuth";
+import { usePrivy } from "@privy-io/react-auth";
 
 interface FanProfile {
-  _id: string
-  name: string
-  avatar: string
-  role: string
-  followingCount: number
-  createdAt: string
+  _id: string;
+  name: string;
+  avatar: string;
+  role: string;
+  followingCount: number;
+  createdAt: string;
 }
 
 interface FollowingCreator {
-  _id: string
-  name: string
-  avatar: string
-  followersCount: number
-  isVerified: boolean
-  genre: string[]
+  _id: string;
+  name: string;
+  avatar: string;
+  followersCount: number;
+  isVerified: boolean;
+  genre: string[];
 }
 
 export default function FanProfilePage() {
-  const params    = useParams()
-  const id        = params?.id as string
-  const { user }  = useAuth()
+  const params = useParams();
+  const id = params?.id as string;
+  const { user } = useAuth();
+  const { exportWallet } = usePrivy();
 
-  const [profile, setProfile]               = useState<FanProfile | null>(null)
-  const [followingCreators, setFollowing]   = useState<FollowingCreator[]>([])
-  const [loading, setLoading]               = useState(true)
-  const [error, setError]                   = useState<string | null>(null)
+  const [profile, setProfile] = useState<FanProfile | null>(null);
+  const [followingCreators, setFollowing] = useState<FollowingCreator[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const isOwnProfile = user?._id === id
+  const isOwnProfile = user?._id === id;
 
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
 
     fetch(`/api/users/${id}`)
-      .then(r => r.json())
-      .then(data => {
+      .then((r) => r.json())
+      .then((data) => {
         if (data.success) {
-          setProfile(data.data.user)
-          setFollowing(data.data.followingCreators)
+          setProfile(data.data.user);
+          setFollowing(data.data.followingCreators);
         } else {
-          setError('Profile not found')
+          setError("Profile not found");
         }
       })
-      .catch(() => setError('Failed to load profile'))
-      .finally(() => setLoading(false))
-  }, [id])
+      .catch(() => setError("Failed to load profile"))
+      .finally(() => setLoading(false));
+  }, [id]);
 
   if (loading) {
     return (
@@ -72,7 +74,7 @@ export default function FanProfilePage() {
         </main>
         <Footer />
       </div>
-    )
+    );
   }
 
   if (error || !profile) {
@@ -80,11 +82,11 @@ export default function FanProfilePage() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1 pt-16 flex items-center justify-center">
-          <p className="text-text-muted">{error || 'Profile not found'}</p>
+          <p className="text-text-muted">{error || "Profile not found"}</p>
         </main>
         <Footer />
       </div>
-    )
+    );
   }
 
   return (
@@ -93,7 +95,6 @@ export default function FanProfilePage() {
 
       <main className="flex-1 pt-16 w-full">
         <div className="max-w-4xl mx-auto px-6 py-12">
-
           {/* Profile header */}
           <div className="flex items-start gap-6 mb-10 pb-10 border-b border-border">
             <div className="w-20 h-20 rounded-full bg-bg-elevated border border-border flex items-center justify-center flex-shrink-0">
@@ -105,7 +106,7 @@ export default function FanProfilePage() {
                 />
               ) : (
                 <span className="text-2xl font-semibold text-text-secondary">
-                  {profile.name?.charAt(0)?.toUpperCase() || '?'}
+                  {profile.name?.charAt(0)?.toUpperCase() || "?"}
                 </span>
               )}
             </div>
@@ -115,7 +116,7 @@ export default function FanProfilePage() {
                 <h1 className="font-display text-2xl font-semibold text-text-primary">
                   {profile.name}
                 </h1>
-                {profile.role === 'creator' && (
+                {profile.role === "creator" && (
                   <Badge variant="verified">Creator</Badge>
                 )}
               </div>
@@ -125,8 +126,10 @@ export default function FanProfilePage() {
               </p>
 
               <p className="text-text-muted text-xs">
-                Joined {new Date(profile.createdAt).toLocaleDateString('en-IN', {
-                  month: 'long', year: 'numeric'
+                Joined{" "}
+                {new Date(profile.createdAt).toLocaleDateString("en-IN", {
+                  month: "long",
+                  year: "numeric",
                 })}
               </p>
 
@@ -136,10 +139,69 @@ export default function FanProfilePage() {
             </div>
           </div>
 
+          {/* Wallet — only show on own profile */}
+          {isOwnProfile && user?.walletAddress && (
+            <div className="mb-10 rounded-xl border border-border bg-bg-surface p-6">
+              <h2 className="font-display text-lg font-semibold text-text-primary mb-1">
+                Your BeeFree Wallet
+              </h2>
+              <p className="text-xs text-text-muted mb-4">
+                Your self-custodial Ethereum wallet — fully owned by you
+              </p>
+
+              <div className="flex items-center gap-3 flex-wrap">
+                <div
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg flex-1 min-w-0"
+                  style={{
+                    background: "var(--color-bg-elevated)",
+                    border: "1px solid var(--color-border)",
+                  }}
+                >
+                  <span className="text-xs text-text-muted font-mono truncate">
+                    {user.walletAddress}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() =>
+                    navigator.clipboard.writeText(user?.walletAddress || "")
+                  }
+                  className="text-xs px-3 py-2 rounded-lg transition-all flex-shrink-0"
+                  style={{
+                    border: "1px solid var(--color-border)",
+                    background: "transparent",
+                    color: "var(--color-text-secondary)",
+                    cursor: "pointer",
+                  }}
+                >
+                  Copy
+                </button>
+
+                <button
+                  onClick={exportWallet}
+                  className="text-xs px-3 py-2 rounded-lg transition-all flex-shrink-0"
+                  style={{
+                    border: "1px solid var(--color-accent)",
+                    background: "#f5e64210",
+                    color: "var(--color-accent)",
+                    cursor: "pointer",
+                  }}
+                >
+                  Export private key ↗
+                </button>
+              </div>
+
+              <p className="text-xs text-text-muted mt-3">
+                Export gives you full control — import into MetaMask or any
+                Ethereum wallet
+              </p>
+            </div>
+          )}
+
           {/* Following list */}
           <div>
             <h2 className="font-display text-xl font-semibold text-text-primary mb-6">
-              {isOwnProfile ? 'Creators you follow' : 'Following'}
+              {isOwnProfile ? "Creators you follow" : "Following"}
             </h2>
 
             {followingCreators.length === 0 ? (
@@ -160,7 +222,7 @@ export default function FanProfilePage() {
               </div>
             ) : (
               <div className="flex flex-col gap-3">
-                {followingCreators.map(creator => (
+                {followingCreators.map((creator) => (
                   <Link
                     key={creator._id}
                     href={`/creator/${creator._id}`}
@@ -176,7 +238,7 @@ export default function FanProfilePage() {
                         />
                       ) : (
                         <span className="text-lg font-semibold text-text-secondary">
-                          {creator.name?.charAt(0)?.toUpperCase() || '?'}
+                          {creator.name?.charAt(0)?.toUpperCase() || "?"}
                         </span>
                       )}
                     </div>
@@ -194,7 +256,7 @@ export default function FanProfilePage() {
                       <p className="text-xs text-text-muted">
                         {creator.followersCount} followers
                         {creator.genre?.length > 0 && (
-                          <> · {creator.genre.slice(0, 2).join(', ')}</>
+                          <> · {creator.genre.slice(0, 2).join(", ")}</>
                         )}
                       </p>
                     </div>
@@ -205,11 +267,10 @@ export default function FanProfilePage() {
               </div>
             )}
           </div>
-
         </div>
       </main>
 
       <Footer />
     </div>
-  )
+  );
 }

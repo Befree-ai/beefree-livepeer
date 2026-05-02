@@ -59,6 +59,12 @@ export function useAuth(): UseAuthReturn {
         "";
       const avatar = (googleAccount as any)?.profilePictureUrl || "";
 
+      // Extract wallet address from Privy linked accounts
+      const walletAccount = privyUser.linkedAccounts?.find(
+        (a: any) => a.type === "wallet" && a.walletClientType === "privy",
+      );
+      const walletAddress = (walletAccount as any)?.address || "";
+
       // Call our sync endpoint
       const response = await fetch("/api/auth/sync", {
         method: "POST",
@@ -66,7 +72,7 @@ export function useAuth(): UseAuthReturn {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ email, phone, name, avatar }),
+        body: JSON.stringify({ email, phone, name, avatar, walletAddress }),
       });
 
       const data = await response.json();

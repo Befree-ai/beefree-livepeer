@@ -41,21 +41,24 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
 
     if (!user) {
-      // New user — create
+      // New user — create with all fields from Privy
       user = await User.create({
         privyId,
-        email: body.email || undefined,
-        phone: body.phone || undefined,
-        name: body.name || "",
-        avatar: body.avatar || "",
-        role: "fan",
+        email:         body.email || undefined,
+        phone:         body.phone || undefined,
+        name:          body.name || "",
+        avatar:        body.avatar || "",
+        walletAddress: body.walletAddress || "",
+        role:          "fan",
       });
     } else {
-      // Update name/avatar/email if empty
+      // Existing user — update fields if missing
+      // walletAddress always updated (never changes, just wasn't saved before)
       const updates: Record<string, string> = {};
-      if (!user.name && body.name) updates.name = body.name;
+      if (!user.name && body.name)     updates.name = body.name;
       if (!user.avatar && body.avatar) updates.avatar = body.avatar;
-      if (!user.email && body.email) updates.email = body.email;
+      if (!user.email && body.email)   updates.email = body.email;
+      if (body.walletAddress)          updates.walletAddress = body.walletAddress;
 
       if (Object.keys(updates).length > 0) {
         user = await User.findOneAndUpdate(
@@ -74,23 +77,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Step 6: Return user data to frontend
+    // Step 6: Return full user data to frontend
+    // Include all fields so frontend has complete user object
     return NextResponse.json<ApiResponse<IUser>>({
       success: true,
       data: {
-        _id: user._id.toString(),
-        privyId: user.privyId,
-        email: user.email,
-        phone: user.phone,
-        name: user.name,
-        avatar: user.avatar,
-        role: user.role,
-        bio: user.bio,
-        followersCount: user.followersCount,
-        followingCount: user.followingCount,
-        isBanned: user.isBanned,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        _id:               user._id.toString(),
+        privyId:           user.privyId,
+        email:             user.email,
+        phone:             user.phone,
+        name:              user.name,
+        avatar:            user.avatar,
+        role:              user.role,
+        bio:               user.bio,
+        genre:             user.genre,
+        socialLinks:       user.socialLinks,
+        followersCount:    user.followersCount,
+        followingCount:    user.followingCount,
+        following:         user.following,
+        walletAddress:     user.walletAddress,
+        isVerified:        user.isVerified,
+        isBanned:          user.isBanned,
+        subscriptionPrice: user.subscriptionPrice,
+        totalEarnings:     user.totalEarnings,
+        createdAt:         user.createdAt,
+        updatedAt:         user.updatedAt,
       },
     });
   } catch (error) {

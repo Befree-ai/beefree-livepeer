@@ -8,32 +8,43 @@ export type StreamStatus = "idle" | "live" | "ended";
 
 export interface IUser {
   _id: string;
-  privyId: string; // Privy unique ID — main identifier
+  privyId: string;
   email?: string;
   phone?: string;
   name?: string;
   avatar?: string;
   role: UserRole;
   bio?: string;
-  followersCount: number;
-  followingCount: number;
-  isBanned: boolean; // banned users cannot access platform
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Creator extends fan with extra fields
-// All creators are also users
-export interface ICreator extends IUser {
-  role: "creator"; // narrows UserRole to only "creator"
-  isVerified: boolean; // manually verified by BeeFree team
-  genre?: string[]; // ["Bollywood", "Indie", "Classical"]
+  genre?: string[];
   socialLinks?: {
     instagram?: string;
     twitter?: string;
     youtube?: string;
   };
-  totalEarnings: number; // in paise (₹1 = 100 paise)
+  followersCount: number;
+  followingCount: number;
+  following?: string[];
+  walletAddress?: string;
+  isVerified?: boolean;
+  isBanned: boolean;
+  totalEarnings?: number;
+  subscriptionPrice?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Creator extends user — narrows role to "creator"
+export interface ICreator extends IUser {
+  role: "creator";
+  isVerified: boolean;
+  isFollowing?: boolean;
+  genre?: string[];
+  socialLinks?: {
+    instagram?: string;
+    twitter?: string;
+    youtube?: string;
+  };
+  totalEarnings: number;
   subscriptionPrice: number;
 }
 
@@ -42,11 +53,11 @@ export interface IVideo {
   _id: string;
   title: string;
   description?: string;
-  playbackId: string; // Livepeer ID — viewers use this
-  assetId: string; // Livepeer ID — for managing asset
+  playbackId: string;
+  assetId: string;
   thumbnailUrl?: string;
-  duration?: number; // seconds, set after Livepeer processing
-  creator: string | ICreator; // string = just ID, ICreator = populated
+  duration?: number;
+  creator: string | ICreator;
   access: VideoAccess;
   status: VideoStatus;
   viewCount: number;
@@ -61,14 +72,14 @@ export interface IStream {
   _id: string;
   title: string;
   description?: string;
-  streamId: string; // Livepeer internal ID
-  streamKey: string; // secret — only for broadcaster
-  playbackId: string; // public — for viewers
+  streamId: string;
+  streamKey: string;
+  playbackId: string;
   creator: string | ICreator;
   access: VideoAccess;
   status: StreamStatus;
   viewerCount: number;
-  recordingPlaybackId?: string; // set after stream ends
+  recordingPlaybackId?: string;
   scheduledAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -83,16 +94,14 @@ export interface ISubscription {
   creatorName: string;
   status: SubscriptionStatus;
   planType: PlanType;
-  razorpayOrderId?: string; // created when payment initiated
-  razorpayPaymentId?: string; // set after payment success
-  amount: number; // in paise (₹99 = 9900)
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  amount: number;
   validUntil: Date;
   createdAt: Date;
 }
 
 // ── API Response ───────────────────────────────────
-// Use this for ALL API route responses
-// Keeps response shape consistent
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
