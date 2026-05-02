@@ -31,6 +31,12 @@ export default function Navbar() {
           {authenticated && (
             <>
               <Link
+                href="/feed"
+                className="text-sm px-3 py-1.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition-all"
+              >
+                Feed
+              </Link>
+              <Link
                 href="/explore"
                 className="text-sm px-3 py-1.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition-all"
               >
@@ -164,6 +170,17 @@ export default function Navbar() {
             borderBottom: "1px solid var(--color-border)",
           }}
         >
+          {/* Feed — for logged in users */}
+          {authenticated && (
+            <Link
+              href="/feed"
+              onClick={() => setMenuOpen(false)}
+              className="text-sm px-3 py-2.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition-all"
+            >
+              Feed
+            </Link>
+          )}
+
           <Link
             href="/explore"
             onClick={() => setMenuOpen(false)}

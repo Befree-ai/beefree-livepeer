@@ -1,38 +1,52 @@
-'use client'
+"use client";
 
-import { useAuth } from '@/hooks/useAuth'
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
-import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
+import { useAuth } from "@/hooks/useAuth";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const features = [
   {
-    stat: '92%',
-    label: 'Revenue to artists',
-    desc: 'vs 55% on YouTube, 20% on labels',
+    stat: "92%",
+    label: "Revenue to artists",
+    desc: "vs 55% on YouTube, 20% on labels",
   },
   {
-    stat: '∞',
-    label: 'Permanent storage',
-    desc: 'Your music lives forever on Arweave',
+    stat: "∞",
+    label: "Permanent storage",
+    desc: "Your music lives forever on Arweave",
   },
   {
-    stat: '0',
-    label: 'Takedowns',
-    desc: 'No algorithm, no censorship, no middlemen',
+    stat: "0",
+    label: "Takedowns",
+    desc: "No algorithm, no censorship, no middlemen",
   },
-]
+];
 
 export default function LandingPage() {
-  const { authenticated, login } = useAuth()
+  const { authenticated, login, user, isLoading } = useAuth();
+
+  const router = useRouter()
+
+  // Redirect logged in users to appropriate page
+  useEffect(() => {
+    if (!isLoading && authenticated && user) {
+      if (user.role === "creator") {
+        router.push("/dashboard");
+      } else {
+        router.push("/feed");
+      }
+    }
+  }, [authenticated, user, isLoading, router]);
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
       <main className="flex-1 pt-16">
-
         {/* Hero */}
         <section className="max-w-6xl mx-auto px-6 pt-24 pb-20">
           <div className="max-w-3xl">
@@ -47,14 +61,17 @@ export default function LandingPage() {
             </h1>
 
             <p className="text-lg text-text-secondary mb-10 max-w-xl leading-relaxed">
-              BeeFree lets Indian artists release music directly to fans.
-              No labels. No YouTube cuts. Just you and your audience.
+              BeeFree lets Indian artists release music directly to fans. No
+              labels. No YouTube cuts. Just you and your audience.
             </p>
 
             <div className="flex items-center gap-4 flex-wrap">
               {authenticated ? (
-                <Button size="lg" onClick={() => window.location.href = '/explore'}>
-                  Explore artists →
+                <Button
+                  size="lg"
+                  onClick={() => (window.location.href = "/feed")}
+                >
+                  Go to feed →
                 </Button>
               ) : (
                 <>
@@ -89,9 +106,7 @@ export default function LandingPage() {
                 <p className="text-base font-medium text-text-primary mb-1">
                   {f.label}
                 </p>
-                <p className="text-sm text-text-muted">
-                  {f.desc}
-                </p>
+                <p className="text-sm text-text-muted">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -111,19 +126,19 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                step: '01',
-                title: 'Verify your identity',
-                desc: 'Sign up with your phone or email. No passwords. Verified Indian artists get a blue tick.',
+                step: "01",
+                title: "Verify your identity",
+                desc: "Sign up with your phone or email. No passwords. Verified Indian artists get a blue tick.",
               },
               {
-                step: '02',
-                title: 'Upload your music',
-                desc: 'Upload videos, albums, live sessions. Content is stored permanently — nobody can take it down.',
+                step: "02",
+                title: "Upload your music",
+                desc: "Upload videos, albums, live sessions. Content is stored permanently — nobody can take it down.",
               },
               {
-                step: '03',
-                title: 'Earn directly',
-                desc: 'Fans subscribe for ₹99/month. You receive 92% instantly via UPI. No waiting, no minimum thresholds.',
+                step: "03",
+                title: "Earn directly",
+                desc: "Fans subscribe for ₹99/month. You receive 92% instantly via UPI. No waiting, no minimum thresholds.",
               },
             ].map((item) => (
               <div key={item.step} className="flex flex-col gap-3">
@@ -155,10 +170,9 @@ export default function LandingPage() {
             </Button>
           </div>
         </section>
-
       </main>
 
       <Footer />
     </div>
-  )
+  );
 }

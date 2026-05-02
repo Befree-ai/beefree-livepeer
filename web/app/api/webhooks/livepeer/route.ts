@@ -1,39 +1,3 @@
-// import { NextRequest, NextResponse } from 'next/server'
-// import connectDB from '@/lib/mongodb'
-// import Video from '@/models/Video'
-// import Stream from '@/models/Stream'
-
-// export async function POST(req: NextRequest) {
-//   try {
-//     // Log raw body first — this is the most important thing
-//     const rawBody = await req.text()
-//     console.log('==========================================')
-//     console.log('[Webhook] RAW BODY:')
-//     console.log(rawBody)
-//     console.log('==========================================')
-//     console.log('[Webhook] HEADERS:')
-//     console.log('content-type:', req.headers.get('content-type'))
-//     console.log('livepeer-signature:', req.headers.get('livepeer-signature'))
-//     console.log('==========================================')
-
-//     const body = JSON.parse(rawBody)
-//     console.log('[Webhook] TOP LEVEL KEYS:', Object.keys(body))
-
-//     await connectDB()
-
-//     // Log everything at top level so we know exact structure
-//     Object.keys(body).forEach(key => {
-//       console.log(`[Webhook] body.${key}:`, JSON.stringify(body[key])?.substring(0, 100))
-//     })
-
-//     return NextResponse.json({ received: true }, { status: 200 })
-
-//   } catch (error) {
-//     console.error('[Webhook Error]', String(error))
-//     return NextResponse.json({ received: true }, { status: 200 })
-//   }
-// }
-
 import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import Video from '@/models/Video'
@@ -48,16 +12,31 @@ export async function POST(req: NextRequest) {
 
     console.log('[Webhook] event:', event)
 
+    // Log full payload — helps debug structure and find thumbnail URL
+    console.log('[Webhook] full payload:', JSON.stringify(payload, null, 2))
+
     await connectDB()
 
     switch (event) {
       case 'asset.ready': {
         const assetId  = payload?.asset?.id
-        const duration = payload?.asset?.snapshot?.videoSpec?.duration || 0
+        const snapshot = payload?.asset?.snapshot
+        const duration = snapshot?.videoSpec?.duration || 0
+
+        // Extra logging to find thumbnail URL structure
+        console.log('[Webhook] asset id:', assetId)
+        console.log('[Webhook] snapshot keys:', Object.keys(snapshot || {}))
+        console.log('[Webhook] downloadUrl:', snapshot?.downloadUrl)
+        console.log('[Webhook] playbackUrl:', snapshot?.playbackUrl)
+
         if (!assetId) break
+
         await Video.findOneAndUpdate(
           { assetId },
-          { status: 'ready', duration: Math.round(duration) }
+          {
+            status:   'ready',
+            duration: Math.round(duration),
+          }
         )
         console.log('[Webhook] asset.ready → updated video', assetId)
         break
