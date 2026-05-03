@@ -70,9 +70,11 @@ export default function Navbar() {
             <>
               <Link
                 href={
-                  user?.role === "creator"
-                    ? `/creator/${user?._id}`
-                    : `/profile/${user?._id}`
+                  !user
+                    ? "#"
+                    : user?.role === "creator"
+                      ? `/creator/${user._id}`
+                      : `/profile/${user._id}`
                 }
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:border-border-hover transition-all"
                 style={{
@@ -116,9 +118,11 @@ export default function Navbar() {
           ) : (
             <Link
               href={
-                user?.role === "creator"
-                  ? `/creator/${user?._id}`
-                  : `/profile/${user?._id}`
+                !user
+                  ? "#"
+                  : user?.role === "creator"
+                    ? `/creator/${user._id}`
+                    : `/profile/${user._id}`
               }
               className="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center"
             >

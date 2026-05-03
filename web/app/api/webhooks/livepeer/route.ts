@@ -12,9 +12,6 @@ export async function POST(req: NextRequest) {
 
     console.log('[Webhook] event:', event)
 
-    // Log full payload — helps debug structure and find thumbnail URL
-    console.log('[Webhook] full payload:', JSON.stringify(payload, null, 2))
-
     await connectDB()
 
     switch (event) {
@@ -23,22 +20,26 @@ export async function POST(req: NextRequest) {
         const snapshot = payload?.asset?.snapshot
         const duration = snapshot?.videoSpec?.duration || 0
 
-        // Extra logging to find thumbnail URL structure
-        console.log('[Webhook] asset id:', assetId)
-        console.log('[Webhook] snapshot keys:', Object.keys(snapshot || {}))
-        console.log('[Webhook] downloadUrl:', snapshot?.downloadUrl)
-        console.log('[Webhook] playbackUrl:', snapshot?.playbackUrl)
+        // Construct thumbnail URL from playbackUrl
+        // playbackUrl: .../hls/[playbackId]/index.m3u8
+        // thumbnail:   .../hls/[playbackId]/thumbnails/keyframes_0.png
+        const playbackUrl  = snapshot?.playbackUrl || ''
+        const thumbnailUrl = playbackUrl
+          ? playbackUrl.replace('/index.m3u8', '/thumbnails/keyframes_0.png')
+          : ''
 
         if (!assetId) break
 
         await Video.findOneAndUpdate(
           { assetId },
           {
-            status:   'ready',
-            duration: Math.round(duration),
+            status:       'ready',
+            duration:     Math.round(duration),
+            thumbnailUrl: thumbnailUrl,
           }
         )
         console.log('[Webhook] asset.ready → updated video', assetId)
+        console.log('[Webhook] thumbnailUrl saved:', thumbnailUrl)
         break
       }
 

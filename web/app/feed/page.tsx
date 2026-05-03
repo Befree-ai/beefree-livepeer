@@ -1,62 +1,65 @@
-'use client'
+"use client";
 
-import { useEffect, useState, useCallback } from 'react'
-import Link from 'next/link'
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
-import Badge from '@/components/ui/Badge'
-import { useAuth } from '@/hooks/useAuth'
-import { usePrivy } from '@privy-io/react-auth'
-import { IVideo, ICreator } from '@/types'
+import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import Badge from "@/components/ui/Badge";
+import { useAuth } from "@/hooks/useAuth";
+import { usePrivy } from "@privy-io/react-auth";
+import { IVideo, ICreator } from "@/types";
 
 interface FeedVideo extends IVideo {
-  creator: ICreator
+  creator: ICreator;
 }
 
 export default function FeedPage() {
-  const { user }           = useAuth()
-  const { getAccessToken } = usePrivy()
+  const { user } = useAuth();
+  const { getAccessToken } = usePrivy();
 
-  const [videos, setVideos]     = useState<FeedVideo[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [page, setPage]         = useState(1)
-  const [hasMore, setHasMore]   = useState(true)
+  const [videos, setVideos] = useState<FeedVideo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const fetchFeed = useCallback(async (pageNum: number, append = false) => {
-    try {
-      const token = await getAccessToken().catch(() => null)
-      const headers: Record<string, string> = {}
-      if (token) headers['Authorization'] = `Bearer ${token}`
+  const fetchFeed = useCallback(
+    async (pageNum: number, append = false) => {
+      try {
+        const token = await getAccessToken().catch(() => null);
+        const headers: Record<string, string> = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const res  = await fetch(`/api/feed?page=${pageNum}`, { headers })
-      const data = await res.json()
+        const res = await fetch(`/api/feed?page=${pageNum}`, { headers });
+        const data = await res.json();
 
-      if (data.success) {
-        if (append) {
-          setVideos(prev => [...prev, ...data.data.videos])
-        } else {
-          setVideos(data.data.videos)
+        if (data.success) {
+          if (append) {
+            setVideos((prev) => [...prev, ...data.data.videos]);
+          } else {
+            setVideos(data.data.videos);
+          }
+          setHasMore(data.data.hasMore);
         }
-        setHasMore(data.data.hasMore)
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
       }
-    } finally {
-      setLoading(false)
-      setLoadingMore(false)
-    }
-  }, [getAccessToken])
+    },
+    [getAccessToken],
+  );
 
   useEffect(() => {
-    fetchFeed(1)
-  }, [fetchFeed])
+    fetchFeed(1);
+  }, [fetchFeed]);
 
   const loadMore = () => {
-    if (loadingMore || !hasMore) return
-    setLoadingMore(true)
-    const nextPage = page + 1
-    setPage(nextPage)
-    fetchFeed(nextPage, true)
-  }
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchFeed(nextPage, true);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -64,18 +67,15 @@ export default function FeedPage() {
 
       <main className="flex-1 pt-16 w-full">
         <div className="max-w-5xl mx-auto px-6 py-10">
-
           {/* Header */}
           <div className="mb-8">
             <h1 className="font-display text-3xl font-semibold text-text-primary mb-1">
-              {user?.followingCount
-                ? 'Your feed'
-                : 'Discover'}
+              {user?.followingCount ? "Your feed" : "Discover"}
             </h1>
             <p className="text-text-muted text-sm">
               {user?.followingCount
-                ? 'Latest from creators you follow'
-                : 'Explore music from Indian artists'}
+                ? "Latest from creators you follow"
+                : "Explore music from Indian artists"}
             </p>
           </div>
 
@@ -83,7 +83,10 @@ export default function FeedPage() {
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="rounded-xl border border-border bg-bg-surface overflow-hidden animate-pulse">
+                <div
+                  key={i}
+                  className="rounded-xl border border-border bg-bg-surface overflow-hidden animate-pulse"
+                >
                   <div className="aspect-video bg-bg-elevated" />
                   <div className="p-4 flex gap-3">
                     <div className="w-9 h-9 rounded-full bg-bg-elevated flex-shrink-0" />
@@ -108,7 +111,7 @@ export default function FeedPage() {
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {videos.map(video => (
+                {videos.map((video) => (
                   <FeedVideoCard key={video._id} video={video} />
                 ))}
               </div>
@@ -121,51 +124,51 @@ export default function FeedPage() {
                     disabled={loadingMore}
                     className="px-6 py-2.5 rounded-lg text-sm transition-all"
                     style={{
-                      border:     '1px solid var(--color-border)',
-                      background: 'transparent',
-                      color:      'var(--color-text-secondary)',
-                      cursor:     loadingMore ? 'not-allowed' : 'pointer',
-                      opacity:    loadingMore ? 0.6 : 1,
+                      border: "1px solid var(--color-border)",
+                      background: "transparent",
+                      color: "var(--color-text-secondary)",
+                      cursor: loadingMore ? "not-allowed" : "pointer",
+                      opacity: loadingMore ? 0.6 : 1,
                     }}
                   >
-                    {loadingMore ? 'Loading...' : 'Load more'}
+                    {loadingMore ? "Loading..." : "Load more"}
                   </button>
                 </div>
               )}
             </>
           )}
-
         </div>
       </main>
 
       <Footer />
     </div>
-  )
+  );
 }
 
 function FeedVideoCard({ video }: { video: FeedVideo }) {
-  const isPremium = video.access === 'premium'
-  const creator   = video.creator as ICreator
+  const isPremium = video.access === "premium";
+  const creator = video.creator as ICreator;
 
   // Thumbnail fallback using playbackId
-  const thumbnail = video.thumbnailUrl
-    || `https://playback.livepeer.studio/asset/hls/${video.playbackId}/thumbnails/thumbnail.png`
+  const thumbnail = video.thumbnailUrl || null;
 
   return (
     <div className="rounded-xl border border-border bg-bg-surface overflow-hidden hover:border-border-hover transition-all">
-
       {/* Thumbnail */}
-      <Link href={isPremium ? `/creator/${creator._id}` : `/video/${video._id}`}>
+      <Link
+        href={isPremium ? `/creator/${creator._id}` : `/video/${video._id}`}
+      >
         <div className="aspect-video bg-bg-elevated relative overflow-hidden">
-          <img
-            src={thumbnail}
-            alt={video.title}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              // Hide broken image — show fallback bg
-              (e.target as HTMLImageElement).style.display = 'none'
-            }}
-          />
+          {thumbnail && (
+            <img
+              src={thumbnail}
+              alt={video.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
+          )}
 
           {/* Premium lock overlay */}
           {isPremium && (
@@ -192,7 +195,7 @@ function FeedVideoCard({ video }: { video: FeedVideo }) {
 
           {/* Badge */}
           <div className="absolute top-2 right-2">
-            <Badge variant={isPremium ? 'premium' : 'free'}>
+            <Badge variant={isPremium ? "premium" : "free"}>
               {video.access}
             </Badge>
           </div>
@@ -212,7 +215,7 @@ function FeedVideoCard({ video }: { video: FeedVideo }) {
               />
             ) : (
               <span className="text-xs font-semibold text-text-secondary">
-                {creator.name?.charAt(0)?.toUpperCase() || '?'}
+                {creator.name?.charAt(0)?.toUpperCase() || "?"}
               </span>
             )}
           </div>
@@ -220,7 +223,9 @@ function FeedVideoCard({ video }: { video: FeedVideo }) {
 
         {/* Video info */}
         <div className="flex-1 min-w-0">
-          <Link href={isPremium ? `/creator/${creator._id}` : `/video/${video._id}`}>
+          <Link
+            href={isPremium ? `/creator/${creator._id}` : `/video/${video._id}`}
+          >
             <p className="font-medium text-text-primary text-sm line-clamp-2 hover:text-accent transition-colors mb-1">
               {video.title}
             </p>
@@ -231,7 +236,12 @@ function FeedVideoCard({ video }: { video: FeedVideo }) {
                 {creator.name}
               </p>
               {creator.isVerified && (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--color-accent)">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="var(--color-accent)"
+                >
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               )}
@@ -242,7 +252,6 @@ function FeedVideoCard({ video }: { video: FeedVideo }) {
           </p>
         </div>
       </div>
-
     </div>
-  )
+  );
 }

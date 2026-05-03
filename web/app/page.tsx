@@ -5,8 +5,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+// import { useEffect } from "react";
+// import { useRouter } from "next/navigation";
 
 const features = [
   {
@@ -29,18 +29,18 @@ const features = [
 export default function LandingPage() {
   const { authenticated, login, user, isLoading } = useAuth();
 
-  const router = useRouter()
+  // const router = useRouter()
 
-  // Redirect logged in users to appropriate page
-  useEffect(() => {
-    if (!isLoading && authenticated && user) {
-      if (user.role === "creator") {
-        router.push("/dashboard");
-      } else {
-        router.push("/feed");
-      }
-    }
-  }, [authenticated, user, isLoading, router]);
+  // // Redirect logged in users to appropriate page
+  // useEffect(() => {
+  //   if (!isLoading && authenticated && user) {
+  //     if (user.role === "creator") {
+  //       router.push("/dashboard");
+  //     } else {
+  //       router.push("/feed");
+  //     }
+  //   }
+  // }, [authenticated, user, isLoading, router]);
 
   return (
     <div className="min-h-screen flex flex-col">
