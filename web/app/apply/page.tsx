@@ -5,43 +5,144 @@ import { useAuth } from '@/hooks/useAuth'
 import { usePrivy } from '@privy-io/react-auth'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import Button from '@/components/ui/Button'
+import Link from 'next/link'
+import FadeUp from '@/components/ui/FadeUp'
 
 const GENRES = [
   'Bollywood', 'Indie', 'Classical', 'Folk', 'Hip-Hop',
   'Electronic', 'Jazz', 'Rock', 'Pop', 'Devotional',
-  'Ghazal', 'Sufi', 'Fusion', 'Instrumental', 'Other'
+  'Ghazal', 'Sufi', 'Fusion', 'Instrumental', 'Punjabi', 'Other',
 ]
 
+// ── Reusable field wrapper ────────────────────────────────────────────────────
+function Field({
+  label,
+  required,
+  hint,
+  children,
+  count,
+  max,
+}: {
+  label: string
+  required?: boolean
+  hint?: string
+  children: React.ReactNode
+  count?: number
+  max?: number
+}) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          {label}
+          {required && <span className="text-red-400 ml-1">*</span>}
+          {hint && (
+            <span className="font-normal ml-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+              {hint}
+            </span>
+          )}
+        </label>
+        {count !== undefined && max && (
+          <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            {count}/{max}
+          </span>
+        )}
+      </div>
+      {children}
+    </div>
+  )
+}
+
+// ── Input styles ──────────────────────────────────────────────────────────────
+const inputStyle = {
+  width: '100%',
+  padding: '10px 14px',
+  borderRadius: '12px',
+  border: '1px solid rgba(255,255,255,0.08)',
+  background: 'rgba(255,255,255,0.03)',
+  color: 'var(--color-text-primary)',
+  fontSize: '14px',
+  outline: 'none',
+  transition: 'border-color 0.2s',
+}
+
+// ── Status screens ────────────────────────────────────────────────────────────
+function StatusScreen({
+  icon,
+  title,
+  desc,
+  color = 'accent',
+}: {
+  icon: string
+  title: string
+  desc: string
+  color?: 'accent' | 'red' | 'pink'
+}) {
+  const colorMap = {
+    accent: { bg: 'rgba(232,184,75,0.08)', border: 'rgba(232,184,75,0.2)', text: 'var(--color-accent)' },
+    red:    { bg: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.2)',  text: '#ef4444' },
+    pink:   { bg: 'rgba(232,52,138,0.08)', border: 'rgba(232,52,138,0.2)', text: 'var(--color-pink)' },
+  }
+  const c = colorMap[color]
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg-primary)' }}>
+      <Navbar />
+      <main className="flex-1 pt-16 flex items-center justify-center px-6">
+        <FadeUp>
+          <div className="text-center max-w-md">
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl"
+              style={{ background: c.bg, border: `1px solid ${c.border}` }}
+            >
+              {icon}
+            </div>
+            <h2
+              className="text-2xl font-bold mb-3"
+              style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}
+            >
+              {title}
+            </h2>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+              {desc}
+            </p>
+          </div>
+        </FadeUp>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 export default function ApplyPage() {
-  const { user, authenticated } = useAuth()
+  const { user, authenticated, isLoading } = useAuth()
   const { login, getAccessToken } = usePrivy()
 
-  const [name, setName]                   = useState('')
-  const [bio, setBio]                     = useState('')
-  const [genre, setGenre]                 = useState<string[]>([])
-  const [instagramHandle, setInstagram]   = useState('')
-  const [sampleWorkUrl, setSampleWork]    = useState('')
+  const [name, setName]               = useState('')
+  const [bio, setBio]                 = useState('')
+  const [genre, setGenre]             = useState<string[]>([])
+  const [instagramHandle, setInstagram] = useState('')
+  const [sampleWorkUrl, setSampleWork]  = useState('')
 
-  const [submitting, setSubmitting]       = useState(false)
-  const [submitted, setSubmitted]         = useState(false)
+  const [submitting, setSubmitting]     = useState(false)
+  const [submitted, setSubmitted]       = useState(false)
   const [existingStatus, setExistingStatus] = useState<string | null>(null)
-  const [error, setError]                 = useState<string | null>(null)
-  const [checking, setChecking]           = useState(true)
+  const [error, setError]               = useState<string | null>(null)
+  const [checking, setChecking]         = useState(true)
 
-  // Pre-fill name from user profile
   useEffect(() => {
     if (user) setName(user.name || '')
   }, [user])
 
-  // Check if already applied
   useEffect(() => {
-    if (!user) { setChecking(false); return }
+    if (!authenticated) { setChecking(false); return }
+    if (!user) return
 
     getAccessToken().then(token => {
       if (!token) { setChecking(false); return }
       fetch('/api/creator-application', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       })
         .then(r => r.json())
         .then(data => {
@@ -54,14 +155,12 @@ export default function ApplyPage() {
   }, [user])
 
   const toggleGenre = (g: string) => {
-    setGenre(prev =>
-      prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g]
-    )
+    setGenre(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g])
   }
 
   const handleSubmit = async () => {
     if (!authenticated) { login(); return }
-    if (!name || !bio) { setError('Name and bio are required'); return }
+    if (!name || !bio) { setError('Artist name and bio are required'); return }
 
     setSubmitting(true)
     setError(null)
@@ -95,222 +194,215 @@ export default function ApplyPage() {
   // Already a creator
   if (user?.role === 'creator') {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 pt-16 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-text-primary font-medium mb-2">You are already a creator!</p>
-            <a href="/dashboard" className="text-accent text-sm">Go to Dashboard →</a>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <StatusScreen
+        icon="✓"
+        title="You're already a creator!"
+        desc="Head to your dashboard to upload content and manage your profile."
+        color="accent"
+      />
     )
   }
 
-  // Loading check
-  if (checking) {
+  // Loading
+  if (isLoading || checking) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 pt-16 flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin"
-            style={{ borderColor: 'var(--color-accent)', borderTopColor: 'transparent' }} />
-        </main>
-        <Footer />
+      <div className="min-h-screen flex items-center justify-center"
+        style={{ background: 'var(--color-bg-primary)' }}>
+        <div
+          className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin"
+          style={{ borderColor: 'var(--color-accent)', borderTopColor: 'transparent' }}
+        />
       </div>
     )
   }
 
-  // Already applied
-  if (existingStatus) {
+  // Already applied — pending
+  if (existingStatus === 'pending') {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 pt-16 flex items-center justify-center px-6">
-          <div className="text-center max-w-md">
-            {existingStatus === 'pending' && (
-              <>
-                <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">⏳</span>
-                </div>
-                <h2 className="font-display text-2xl font-semibold text-text-primary mb-2">
-                  Application under review
-                </h2>
-                <p className="text-text-muted text-sm">
-                  We've received your application and will review it shortly.
-                  Sign out and back in after approval to access your creator dashboard.
-                </p>
-              </>
-            )}
-            {existingStatus === 'rejected' && (
-              <>
-                <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">✕</span>
-                </div>
-                <h2 className="font-display text-2xl font-semibold text-text-primary mb-2">
-                  Application not approved
-                </h2>
-                <p className="text-text-muted text-sm">
-                  Unfortunately your application wasn't approved this time.
-                  Feel free to reach out to us directly.
-                </p>
-              </>
-            )}
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <StatusScreen
+        icon="⏳"
+        title="Application under review"
+        desc="We've received your application and will review it shortly. Sign out and back in after approval to access your creator dashboard."
+        color="pink"
+      />
     )
   }
 
-  // Success after submit
+  // Already applied — rejected
+  if (existingStatus === 'rejected') {
+    return (
+      <StatusScreen
+        icon="✕"
+        title="Application not approved"
+        desc="Unfortunately your application wasn't approved this time. Feel free to reach out to us directly."
+        color="red"
+      />
+    )
+  }
+
+  // Success
   if (submitted) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 pt-16 flex items-center justify-center px-6">
-          <div className="text-center max-w-md">
-            <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">✓</span>
-            </div>
-            <h2 className="font-display text-2xl font-semibold text-text-primary mb-2">
-              Application submitted!
-            </h2>
-            <p className="text-text-muted text-sm">
-              We'll review your application and get back to you.
-              Once approved, sign out and back in to access your creator dashboard.
-            </p>
-          </div>
-        </main>
-        <Footer />
-      </div>
+      <StatusScreen
+        icon="🎉"
+        title="Application submitted!"
+        desc="We'll review your application and get back to you. Once approved, sign out and back in to access your creator dashboard."
+        color="accent"
+      />
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg-primary)' }}>
       <Navbar />
       <main className="flex-1 pt-16 w-full">
         <div className="max-w-2xl mx-auto px-6 py-12">
 
-          <div className="mb-8">
-            <h1 className="font-display text-3xl font-semibold text-text-primary mb-2">
-              Become a Creator
-            </h1>
-            <p className="text-text-muted text-sm">
-              Share your music with fans and earn directly. No labels. No middlemen.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-6">
-
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">
-                Artist / Stage name <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="Your artist name"
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-border-hover transition-colors"
-              />
+          {/* Header */}
+          <FadeUp>
+            <div className="mb-10">
+              <p
+                className="text-xs font-semibold tracking-widest mb-3 uppercase"
+                style={{ color: 'var(--color-accent)' }}
+              >
+                Early access
+              </p>
+              <h1
+                className="text-4xl font-bold mb-3"
+                style={{ fontFamily: 'var(--font-display)', color: 'var(--color-text-primary)' }}
+              >
+                Become a Creator
+              </h1>
+              <p style={{ color: 'var(--color-text-secondary)' }}>
+                Share your music with fans and earn directly.
+                No labels. No middlemen. Just you and your audience.
+              </p>
             </div>
+          </FadeUp>
 
-            {/* Bio */}
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">
-                About you <span className="text-red-400">*</span>
-                <span className="text-text-muted font-normal ml-2">{bio.length}/500</span>
-              </label>
-              <textarea
-                value={bio}
-                onChange={e => setBio(e.target.value.slice(0, 500))}
-                placeholder="Tell us about your music, your journey, what makes you unique..."
-                rows={4}
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-border-hover transition-colors resize-none"
-              />
-            </div>
+          <FadeUp delay={0.1}>
+            <div className="flex flex-col gap-6">
 
-            {/* Genre */}
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-3">
-                Genre
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {GENRES.map(g => (
-                  <button
-                    key={g}
-                    onClick={() => toggleGenre(g)}
-                    className="text-xs px-3 py-1.5 rounded-full border transition-all"
-                    style={{
-                      borderColor: genre.includes(g) ? 'var(--color-accent)' : 'var(--color-border)',
-                      background:  genre.includes(g) ? '#f5e64215' : 'var(--color-bg-elevated)',
-                      color:       genre.includes(g) ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                    }}
-                  >
-                    {g}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Instagram */}
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">
-                Instagram handle
-                <span className="text-text-muted font-normal ml-2">so we can verify you're real</span>
-              </label>
-              <div className="flex items-center gap-2">
-                <span className="text-text-muted text-sm">@</span>
+              {/* Name */}
+              <Field label="Artist / Stage name" required>
                 <input
                   type="text"
-                  value={instagramHandle}
-                  onChange={e => setInstagram(e.target.value.replace('@', ''))}
-                  placeholder="yourhandle"
-                  className="flex-1 px-4 py-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-border-hover transition-colors"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Your artist name"
+                  style={inputStyle}
                 />
-              </div>
-            </div>
+              </Field>
 
-            {/* Sample work */}
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">
-                Sample work URL
-                <span className="text-text-muted font-normal ml-2">YouTube, SoundCloud, Spotify etc.</span>
-              </label>
-              <input
-                type="text"
-                value={sampleWorkUrl}
-                onChange={e => setSampleWork(e.target.value)}
-                placeholder="https://youtube.com/..."
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-border-hover transition-colors"
-              />
-            </div>
+              {/* Bio */}
+              <Field
+                label="About you"
+                required
+                count={bio.length}
+                max={500}
+              >
+                <textarea
+                  value={bio}
+                  onChange={e => setBio(e.target.value.slice(0, 500))}
+                  placeholder="Tell us about your music, your journey, what makes you unique..."
+                  rows={4}
+                  style={{ ...inputStyle, resize: 'none' }}
+                />
+              </Field>
 
-            {error && (
-              <p className="text-sm text-red-400 bg-red-500/5 border border-red-500/20 px-4 py-3 rounded-lg">
-                {error}
+              {/* Genre */}
+              <Field label="Genre">
+                <div className="flex flex-wrap gap-2">
+                  {GENRES.map(g => {
+                    const selected = genre.includes(g)
+                    return (
+                      <button
+                        key={g}
+                        onClick={() => toggleGenre(g)}
+                        className="text-xs px-3 py-1.5 rounded-full transition-all"
+                        style={{
+                          borderWidth: '1px',
+                          borderStyle: 'solid',
+                          borderColor: selected ? 'var(--color-accent)' : 'rgba(255,255,255,0.08)',
+                          background: selected ? 'rgba(232,184,75,0.1)' : 'transparent',
+                          color: selected ? 'var(--color-accent)' : 'var(--color-text-muted)',
+                          cursor: 'pointer',
+                          fontWeight: selected ? 600 : 400,
+                        }}
+                      >
+                        {g}
+                      </button>
+                    )
+                  })}
+                </div>
+              </Field>
+
+              {/* Instagram */}
+              <Field label="Instagram handle" hint="so we can verify you're real">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>
+                    @
+                  </span>
+                  <input
+                    type="text"
+                    value={instagramHandle}
+                    onChange={e => setInstagram(e.target.value.replace('@', ''))}
+                    placeholder="yourhandle"
+                    style={{ ...inputStyle }}
+                  />
+                </div>
+              </Field>
+
+              {/* Sample work */}
+              <Field label="Sample work URL" hint="YouTube, SoundCloud, Spotify etc.">
+                <input
+                  type="text"
+                  value={sampleWorkUrl}
+                  onChange={e => setSampleWork(e.target.value)}
+                  placeholder="https://youtube.com/..."
+                  style={inputStyle}
+                />
+              </Field>
+
+              {/* Error */}
+              {error && (
+                <div
+                  className="px-4 py-3 rounded-xl text-sm"
+                  style={{
+                    background: 'rgba(239,68,68,0.06)',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                    color: '#ef4444',
+                  }}
+                >
+                  {error}
+                </div>
+              )}
+
+              {/* Submit */}
+              <button
+                onClick={handleSubmit}
+                disabled={submitting || !name || !bio}
+                className="w-full py-3.5 rounded-xl text-sm font-semibold transition-all"
+                style={{
+                  background: submitting || !name || !bio
+                    ? 'rgba(232,184,75,0.3)'
+                    : 'var(--color-accent)',
+                  color: '#000',
+                  border: 'none',
+                  cursor: submitting || !name || !bio ? 'not-allowed' : 'pointer',
+                  opacity: submitting ? 0.7 : 1,
+                }}
+              >
+                {submitting ? 'Submitting...' : 'Submit application →'}
+              </button>
+
+              <p className="text-xs text-center" style={{ color: 'var(--color-text-muted)' }}>
+                We review every application manually.
+                You'll need to sign out and back in after approval.
               </p>
-            )}
 
-            <Button
-              variant="primary"
-              size="md"
-              onClick={handleSubmit}
-              loading={submitting}
-              disabled={!name || !bio}
-            >
-              Submit application
-            </Button>
-
-            <p className="text-xs text-text-muted">
-              We review every application manually. You'll need to sign out and back in after approval.
-            </p>
-
-          </div>
+            </div>
+          </FadeUp>
         </div>
       </main>
       <Footer />
