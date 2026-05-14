@@ -5,8 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePrivy } from "@privy-io/react-auth";
 import * as Broadcast from "@livepeer/react/broadcast";
 import { getIngest } from "@livepeer/react/external";
-import Button from "@/components/ui/Button";
-import Badge from "@/components/ui/Badge";
+import FadeUp from "@/components/ui/FadeUp";
 
 type StreamStatus = "idle" | "creating" | "ready" | "live" | "error";
 
@@ -16,6 +15,17 @@ interface StreamData {
   playbackId: string;
   rtmpIngestUrl: string;
   whipUrl: string;
+}
+
+const inputStyle = {
+  width: "100%",
+  padding: "10px 14px",
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.03)",
+  color: "var(--color-text-primary)",
+  fontSize: "14px",
+  outline: "none",
 }
 
 export default function GoLivePage() {
@@ -30,24 +40,14 @@ export default function GoLivePage() {
   const [useBrowser, setUseBrowser] = useState(true);
   const [copied, setCopied] = useState<string | null>(null);
 
-  // Stop camera/mic when leaving the page
   useEffect(() => {
     return () => {
-      // On unmount — stop all media tracks
-      navigator.mediaDevices
-        ?.getUserMedia({ video: true, audio: true })
-        .then((stream) => {
-          stream.getTracks().forEach((track) => track.stop());
-        })
+      navigator.mediaDevices?.getUserMedia({ video: true, audio: true })
+        .then(stream => { stream.getTracks().forEach(track => track.stop()) })
         .catch(() => {});
-
-      // Also stop any existing streams in DOM
-      document.querySelectorAll("video").forEach((video) => {
+      document.querySelectorAll("video").forEach(video => {
         const stream = video.srcObject as MediaStream;
-        if (stream) {
-          stream.getTracks().forEach((track) => track.stop());
-          video.srcObject = null;
-        }
+        if (stream) { stream.getTracks().forEach(track => track.stop()); video.srcObject = null; }
       });
     };
   }, []);
@@ -56,24 +56,16 @@ export default function GoLivePage() {
     if (!title) return;
     setError(null);
     setStatus("creating");
-
     try {
       const token = await getAccessToken();
       if (!token) throw new Error("Not authenticated");
-
       const res = await fetch("/api/streams", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ title, access }),
       });
-
       const data = await res.json();
-      if (!data.success)
-        throw new Error(data.error || "Failed to create stream");
-
+      if (!data.success) throw new Error(data.error || "Failed to create stream");
       setStream(data.data);
       setStatus("ready");
     } catch (err: unknown) {
@@ -90,197 +82,180 @@ export default function GoLivePage() {
 
   return (
     <div className="max-w-2xl">
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-semibold text-text-primary mb-1">
-          Go Live
-        </h1>
-        <p className="text-text-muted text-sm">
-          Stream directly to your fans in real time
-        </p>
-      </div>
-
-      {/* Step 1 — Create stream */}
-      {status === "idle" || status === "creating" || status === "error" ? (
-        <div className="flex flex-col gap-6">
-          <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">
-              Stream title <span className="text-red-400">*</span>
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Live Q&A with fans"
-              className="w-full px-4 py-2.5 rounded-lg border border-border bg-bg-elevated text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-border-hover transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">
-              Access
-            </label>
-            <div className="flex gap-3">
-              {(["free", "premium"] as const).map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => setAccess(opt)}
-                  className="flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all"
-                  style={{
-                    borderColor:
-                      access === opt
-                        ? "var(--color-accent, #f5e642)"
-                        : "var(--color-border, #1f1f1f)",
-                    background:
-                      access === opt
-                        ? "#f5e64215"
-                        : "var(--color-bg-elevated, #1a1a1a)",
-                    color:
-                      access === opt
-                        ? "var(--color-accent, #f5e642)"
-                        : "var(--color-text-secondary, #a0a0a0)",
-                  }}
-                >
-                  {opt === "free" ? "🌍 Free" : "🔒 Premium"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">
-              How will you stream?
-            </label>
-            <div className="flex gap-3">
-              {[
-                { key: true, label: "🌐 Browser (recommended)" },
-                { key: false, label: "🎬 OBS / External software" },
-              ].map((opt) => (
-                <button
-                  key={String(opt.key)}
-                  onClick={() => setUseBrowser(opt.key)}
-                  className="flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all"
-                  style={{
-                    borderColor:
-                      useBrowser === opt.key
-                        ? "var(--color-accent, #f5e642)"
-                        : "var(--color-border, #1f1f1f)",
-                    background:
-                      useBrowser === opt.key
-                        ? "#f5e64215"
-                        : "var(--color-bg-elevated, #1a1a1a)",
-                    color:
-                      useBrowser === opt.key
-                        ? "var(--color-accent, #f5e642)"
-                        : "var(--color-text-secondary, #a0a0a0)",
-                  }}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {error && (
-            <p className="text-sm text-red-400 bg-red-500/5 border border-red-500/20 px-4 py-3 rounded-lg">
-              {error}
-            </p>
-          )}
-
-          <Button
-            variant="primary"
-            size="md"
-            onClick={handleCreateStream}
-            disabled={!title}
-            loading={status === "creating"}
-          >
-            Create stream
-          </Button>
+      <FadeUp>
+        <div className="mb-8">
+          <p className="text-xs font-semibold tracking-widest mb-2 uppercase"
+            style={{ color: "var(--color-accent)" }}>
+            Live
+          </p>
+          <h1 className="text-3xl font-bold mb-1"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-text-primary)" }}>
+            Go Live
+          </h1>
+          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+            Stream directly to your fans in real time
+          </p>
         </div>
-      ) : (
-        stream && (
-          /* Step 2 — Stream ready */
+      </FadeUp>
+
+      {/* Step 1 — Setup */}
+      {(status === "idle" || status === "creating" || status === "error") && (
+        <FadeUp delay={0.05}>
           <div className="flex flex-col gap-6">
-            <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-4 flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <p className="text-sm text-green-400 font-medium">
-                Stream created — you&apos;re ready to go live!
+
+            <div>
+              <label className="block text-sm font-semibold mb-2"
+                style={{ color: "var(--color-text-primary)" }}>
+                Stream title <span style={{ color: "#ef4444" }}>*</span>
+              </label>
+              <input type="text" value={title} onChange={e => setTitle(e.target.value)}
+                placeholder="e.g. Live Q&A with fans" style={inputStyle} />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-2"
+                style={{ color: "var(--color-text-primary)" }}>
+                Access
+              </label>
+              <div className="flex gap-3">
+                {(["free", "premium"] as const).map(opt => (
+                  <button key={opt} onClick={() => setAccess(opt)}
+                    className="flex-1 py-3 rounded-xl text-sm font-medium transition-all"
+                    style={{
+                      borderWidth: "1px", borderStyle: "solid",
+                      borderColor: access === opt ? "var(--color-accent)" : "rgba(255,255,255,0.08)",
+                      background: access === opt ? "rgba(232,184,75,0.08)" : "transparent",
+                      color: access === opt ? "var(--color-accent)" : "var(--color-text-muted)",
+                      cursor: "pointer", fontWeight: access === opt ? 600 : 400,
+                    }}>
+                    {opt === "free" ? "🌍 Free" : "🔒 Premium"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-2"
+                style={{ color: "var(--color-text-primary)" }}>
+                How will you stream?
+              </label>
+              <div className="flex gap-3">
+                {[
+                  { key: true, label: "🌐 Browser (recommended)" },
+                  { key: false, label: "🎬 OBS / External" },
+                ].map(opt => (
+                  <button key={String(opt.key)} onClick={() => setUseBrowser(opt.key)}
+                    className="flex-1 py-3 rounded-xl text-sm font-medium transition-all"
+                    style={{
+                      borderWidth: "1px", borderStyle: "solid",
+                      borderColor: useBrowser === opt.key ? "var(--color-accent)" : "rgba(255,255,255,0.08)",
+                      background: useBrowser === opt.key ? "rgba(232,184,75,0.08)" : "transparent",
+                      color: useBrowser === opt.key ? "var(--color-accent)" : "var(--color-text-muted)",
+                      cursor: "pointer", fontWeight: useBrowser === opt.key ? 600 : 400,
+                    }}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {error && (
+              <div className="px-4 py-3 rounded-xl text-sm"
+                style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444" }}>
+                {error}
+              </div>
+            )}
+
+            <button onClick={handleCreateStream} disabled={!title || status === "creating"}
+              className="px-6 py-3 rounded-xl text-sm font-semibold transition-all"
+              style={{
+                background: !title ? "rgba(232,184,75,0.3)" : "var(--color-accent)",
+                color: "#000", border: "none",
+                cursor: !title ? "not-allowed" : "pointer",
+              }}>
+              {status === "creating" ? "Creating..." : "Create stream →"}
+            </button>
+          </div>
+        </FadeUp>
+      )}
+
+      {/* Step 2 — Stream ready */}
+      {stream && status !== "idle" && status !== "creating" && status !== "error" && (
+        <FadeUp delay={0.05}>
+          <div className="flex flex-col gap-6">
+
+            {/* Ready badge */}
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
+              style={{ background: "rgba(29,158,117,0.06)", border: "1px solid rgba(29,158,117,0.2)" }}>
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#1D9E75" }} />
+              <p className="text-sm font-medium" style={{ color: "#1D9E75" }}>
+                Stream created — you're ready to go live!
               </p>
             </div>
 
-            {/* Stream info */}
-            <div className="rounded-xl border border-border bg-bg-surface p-5 flex flex-col gap-4">
-              <p className="text-sm font-medium text-text-primary">
+            {/* Stream info card */}
+            <div className="rounded-2xl p-5 flex flex-col gap-4"
+              style={{ background: "var(--color-bg-surface)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <p className="text-sm font-semibold" style={{ color: "var(--color-text-primary)" }}>
                 Stream details
               </p>
 
-              {/* Playback URL */}
+              {/* Viewer URL */}
               <div>
-                <p className="text-xs text-text-muted mb-1.5">Viewer URL</p>
+                <p className="text-xs mb-1.5" style={{ color: "var(--color-text-muted)" }}>Viewer URL</p>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 text-xs bg-bg-elevated px-3 py-2 rounded-lg text-text-secondary truncate border border-border">
-                    {typeof window !== "undefined"
-                      ? window.location.origin
-                      : ""}
-                    /stream/{stream.playbackId}
+                  <code className="flex-1 text-xs px-3 py-2 rounded-xl truncate"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "var(--color-text-secondary)" }}>
+                    {typeof window !== "undefined" ? window.location.origin : ""}/stream/{stream.playbackId}
                   </code>
-                  <button
-                    onClick={() =>
-                      handleCopy(
-                        `${window.location.origin}/stream/${stream.playbackId}`,
-                        "url",
-                      )
-                    }
-                    className="text-xs px-3 py-2 rounded-lg border border-border text-text-muted hover:text-text-primary hover:border-border-hover transition-all flex-shrink-0"
-                  >
+                  <button onClick={() => handleCopy(`${window.location.origin}/stream/${stream.playbackId}`, "url")}
+                    className="text-xs px-3 py-2 rounded-xl transition-all flex-shrink-0 font-medium"
+                    style={{ border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: copied === "url" ? "#1D9E75" : "var(--color-text-muted)", cursor: "pointer" }}>
                     {copied === "url" ? "✓ Copied" : "Copy"}
                   </button>
                 </div>
               </div>
 
-              {/* RTMP for OBS */}
+              {/* OBS fields */}
               {!useBrowser && (
                 <>
                   <div>
-                    <p className="text-xs text-text-muted mb-1.5">
-                      RTMP Ingest URL (for OBS)
-                    </p>
+                    <p className="text-xs mb-1.5" style={{ color: "var(--color-text-muted)" }}>RTMP Ingest URL</p>
                     <div className="flex items-center gap-2">
-                      <code className="flex-1 text-xs bg-bg-elevated px-3 py-2 rounded-lg text-text-secondary truncate border border-border">
+                      <code className="flex-1 text-xs px-3 py-2 rounded-xl truncate"
+                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "var(--color-text-secondary)" }}>
                         {stream.rtmpIngestUrl}
                       </code>
-                      <button
-                        onClick={() => handleCopy(stream.rtmpIngestUrl, "rtmp")}
-                        className="text-xs px-3 py-2 rounded-lg border border-border text-text-muted hover:text-text-primary transition-all flex-shrink-0"
-                      >
-                        {copied === "rtmp" ? "✓ Copied" : "Copy"}
+                      <button onClick={() => handleCopy(stream.rtmpIngestUrl, "rtmp")}
+                        className="text-xs px-3 py-2 rounded-xl flex-shrink-0 font-medium"
+                        style={{ border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: copied === "rtmp" ? "#1D9E75" : "var(--color-text-muted)", cursor: "pointer" }}>
+                        {copied === "rtmp" ? "✓" : "Copy"}
                       </button>
                     </div>
                   </div>
 
                   <div>
-                    <p className="text-xs text-text-muted mb-1.5">
-                      Stream Key (keep secret!)
+                    <p className="text-xs mb-1.5" style={{ color: "var(--color-text-muted)" }}>
+                      Stream Key <span style={{ color: "#ef4444" }}>(keep secret!)</span>
                     </p>
                     <div className="flex items-center gap-2">
-                      <code className="flex-1 text-xs bg-bg-elevated px-3 py-2 rounded-lg text-text-secondary truncate border border-border">
+                      <code className="flex-1 text-xs px-3 py-2 rounded-xl truncate"
+                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "var(--color-text-secondary)" }}>
                         {stream.streamKey}
                       </code>
-                      <button
-                        onClick={() => handleCopy(stream.streamKey, "key")}
-                        className="text-xs px-3 py-2 rounded-lg border border-border text-text-muted hover:text-text-primary transition-all flex-shrink-0"
-                      >
-                        {copied === "key" ? "✓ Copied" : "Copy"}
+                      <button onClick={() => handleCopy(stream.streamKey, "key")}
+                        className="text-xs px-3 py-2 rounded-xl flex-shrink-0 font-medium"
+                        style={{ border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: copied === "key" ? "#1D9E75" : "var(--color-text-muted)", cursor: "pointer" }}>
+                        {copied === "key" ? "✓" : "Copy"}
                       </button>
                     </div>
                   </div>
 
-                  <div className="rounded-lg bg-bg-elevated border border-border p-3">
-                    <p className="text-xs text-text-muted leading-relaxed">
-                      <span className="text-text-secondary font-medium">
-                        OBS Setup:{" "}
-                      </span>
-                      Go to Settings → Stream → Service: Custom → paste RTMP URL
-                      and Stream Key above.
+                  <div className="px-3 py-2.5 rounded-xl"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <p className="text-xs leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
+                      <span style={{ color: "var(--color-text-secondary)", fontWeight: 500 }}>OBS Setup: </span>
+                      Settings → Stream → Service: Custom → paste RTMP URL and Stream Key above.
                     </p>
                   </div>
                 </>
@@ -289,130 +264,37 @@ export default function GoLivePage() {
 
             {/* Browser broadcast */}
             {useBrowser && (
-              <div className="rounded-xl border border-border bg-bg-surface overflow-hidden">
-                <div className="p-4 border-b border-border">
-                  <p className="text-sm font-medium text-text-primary">
+              <div className="rounded-2xl overflow-hidden"
+                style={{ border: "1px solid rgba(255,255,255,0.06)", background: "var(--color-bg-surface)" }}>
+                <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                  <p className="text-sm font-semibold" style={{ color: "var(--color-text-primary)" }}>
                     Browser broadcast
                   </p>
-                  <p className="text-xs text-text-muted mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
                     Allow camera and microphone access to start streaming
                   </p>
                 </div>
                 <div className="p-4">
                   <Broadcast.Root ingestUrl={stream.whipUrl}>
-                    <Broadcast.Container
-                      style={{
-                        width: "100%",
-                        aspectRatio: "16/9",
-                        backgroundColor: "#000",
-                        borderRadius: 8,
-                        overflow: "hidden",
-                        position: "relative",
-                      }}
-                    >
-                      <Broadcast.Video
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                      <Broadcast.Controls
-                        style={{
-                          position: "absolute",
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          padding: "12px 16px",
-                          background:
-                            "linear-gradient(transparent, rgba(0,0,0,0.8))",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 12,
-                        }}
-                      >
-                        <Broadcast.EnabledTrigger
-                          style={{
-                            background: "#f5e642",
-                            border: "none",
-                            borderRadius: 8,
-                            padding: "8px 16px",
-                            fontSize: 13,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            color: "#000",
-                          }}
-                        >
-                          <Broadcast.EnabledIndicator asChild matcher={false}>
-                            <span>🔴 Go Live</span>
-                          </Broadcast.EnabledIndicator>
-                          <Broadcast.EnabledIndicator asChild>
-                            <span>⏹ Stop</span>
-                          </Broadcast.EnabledIndicator>
+                    <Broadcast.Container style={{ width: "100%", aspectRatio: "16/9", backgroundColor: "#000", borderRadius: 12, overflow: "hidden", position: "relative" }}>
+                      <Broadcast.Video style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <Broadcast.Controls style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 16px", background: "linear-gradient(transparent, rgba(0,0,0,0.8))", display: "flex", alignItems: "center", gap: 12 }}>
+                        <Broadcast.EnabledTrigger style={{ background: "var(--color-accent)", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#000" }}>
+                          <Broadcast.EnabledIndicator asChild matcher={false}><span>🔴 Go Live</span></Broadcast.EnabledIndicator>
+                          <Broadcast.EnabledIndicator asChild><span>⏹ Stop</span></Broadcast.EnabledIndicator>
                         </Broadcast.EnabledTrigger>
-
-                        <Broadcast.VideoEnabledTrigger
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            cursor: "pointer",
-                            color: "white",
-                            fontSize: 16,
-                          }}
-                        >
-                          <Broadcast.VideoEnabledIndicator
-                            asChild
-                            matcher={false}
-                          >
-                            <span>📷</span>
-                          </Broadcast.VideoEnabledIndicator>
-                          <Broadcast.VideoEnabledIndicator asChild>
-                            <span>🚫</span>
-                          </Broadcast.VideoEnabledIndicator>
+                        <Broadcast.VideoEnabledTrigger style={{ background: "transparent", border: "none", cursor: "pointer", color: "white", fontSize: 16 }}>
+                          <Broadcast.VideoEnabledIndicator asChild matcher={false}><span>📷</span></Broadcast.VideoEnabledIndicator>
+                          <Broadcast.VideoEnabledIndicator asChild><span>🚫</span></Broadcast.VideoEnabledIndicator>
                         </Broadcast.VideoEnabledTrigger>
-
-                        <Broadcast.AudioEnabledTrigger
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            cursor: "pointer",
-                            color: "white",
-                            fontSize: 16,
-                          }}
-                        >
-                          <Broadcast.AudioEnabledIndicator
-                            asChild
-                            matcher={false}
-                          >
-                            <span>🎤</span>
-                          </Broadcast.AudioEnabledIndicator>
-                          <Broadcast.AudioEnabledIndicator asChild>
-                            <span>🔇</span>
-                          </Broadcast.AudioEnabledIndicator>
+                        <Broadcast.AudioEnabledTrigger style={{ background: "transparent", border: "none", cursor: "pointer", color: "white", fontSize: 16 }}>
+                          <Broadcast.AudioEnabledIndicator asChild matcher={false}><span>🎤</span></Broadcast.AudioEnabledIndicator>
+                          <Broadcast.AudioEnabledIndicator asChild><span>🔇</span></Broadcast.AudioEnabledIndicator>
                         </Broadcast.AudioEnabledTrigger>
-
                         <div style={{ flex: 1 }} />
-
-                        <Broadcast.StatusIndicator
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 6,
-                          }}
-                          matcher="live"
-                        >
-                          <div
-                            style={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: "50%",
-                              background: "#ef4444",
-                              animation: "pulse 2s infinite",
-                            }}
-                          />
-                          <span style={{ color: "white", fontSize: 12 }}>
-                            LIVE
-                          </span>
+                        <Broadcast.StatusIndicator style={{ display: "flex", alignItems: "center", gap: 6 }} matcher="live">
+                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#ef4444" }} />
+                          <span style={{ color: "white", fontSize: 12, fontWeight: 600 }}>LIVE</span>
                         </Broadcast.StatusIndicator>
                       </Broadcast.Controls>
                     </Broadcast.Container>
@@ -421,19 +303,13 @@ export default function GoLivePage() {
               </div>
             )}
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setStatus("idle");
-                setStream(null);
-                setTitle("");
-              }}
-            >
+            <button onClick={() => { setStatus("idle"); setStream(null); setTitle("") }}
+              className="text-sm font-medium transition-all hover:opacity-70"
+              style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--color-text-muted)", textAlign: "left" }}>
               ← Create new stream
-            </Button>
+            </button>
           </div>
-        )
+        </FadeUp>
       )}
     </div>
   );
