@@ -15,6 +15,7 @@
     "@privy-io/server-auth": "^1.32.5",
     "@radix-ui/react-popover": "^1.1.15",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
     "livepeer": "^3.5.0",
     "lucide-react": "^1.8.0",
     "mongoose": "^9.4.1",
