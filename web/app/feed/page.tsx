@@ -82,7 +82,7 @@ function FeedVideoCard({ video }: { video: FeedVideo }) {
           </div>
 
           {/* Duration placeholder bottom left */}
-          {video.duration > 0 && (
+          {(video.duration ?? 0) > 0 && (
             <div
               className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-xs font-semibold"
               style={{ background: "rgba(0,0,0,0.8)", color: "#fff" }}
