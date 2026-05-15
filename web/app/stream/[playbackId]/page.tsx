@@ -119,7 +119,7 @@ export default function StreamViewerPage() {
     return new Promise(resolve => {
       if ((window as any).Razorpay) { resolve(); return; }
       const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js"\;
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => resolve();
       document.body.appendChild(script);
     });
