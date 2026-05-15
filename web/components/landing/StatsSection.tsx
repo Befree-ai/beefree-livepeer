@@ -5,7 +5,7 @@ import Counter from "@/components/ui/Counter";
 
 const STATS = [
   {
-    value: 92,
+    value: 95,
     suffix: "%",
     label: "Revenue to creators",
     sub: "vs 55% on YouTube · 20% with labels",

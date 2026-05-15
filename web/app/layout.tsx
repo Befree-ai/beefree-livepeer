@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "BeeFree — Music for the free",
-  description: "India-first creator platform. Artists keep 92% of revenue.",
+  description: "India-first creator platform. Artists keep 95% of revenue.",
 };
 
 export default function RootLayout({

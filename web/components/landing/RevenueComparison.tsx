@@ -9,7 +9,7 @@ const PLATFORMS = [
   { label: "Spotify", creatorGets: 30, delay: 0.1 },
   { label: "YouTube", creatorGets: 55, delay: 0.2 },
   { label: "Patreon", creatorGets: 88, delay: 0.3 },
-  { label: "BeeFree", creatorGets: 92, delay: 0.4 },
+  { label: "BeeFree", creatorGets: 95, delay: 0.4 },
 ];
 
 function RevenueBar({

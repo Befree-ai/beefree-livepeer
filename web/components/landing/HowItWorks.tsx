@@ -19,7 +19,7 @@ const STEPS = [
   {
     step: "03",
     title: "Earn directly from fans.",
-    desc: "Fans subscribe, buy your creator tokens, or tip you directly. 92% goes straight to you — via UPI, card, or crypto. No waiting. No minimum thresholds.",
+    desc: "Fans subscribe, buy your creator tokens, or tip you directly. 95% goes straight to you — via UPI, card, or crypto. No waiting. No minimum thresholds.",
     imgLabel: "Step 3 illustration · 400×300px",
   },
 ];
