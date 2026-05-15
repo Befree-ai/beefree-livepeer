@@ -87,7 +87,7 @@ function FeedVideoCard({ video }: { video: FeedVideo }) {
               className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-xs font-semibold"
               style={{ background: "rgba(0,0,0,0.8)", color: "#fff" }}
             >
-              {Math.floor(video.duration / 60)}:{String(video.duration % 60).padStart(2, "0")}
+              {Math.floor((video.duration ?? 0) / 60)}:{String((video.duration ?? 0) % 60).padStart(2, "0")}
             </div>
           )}
         </div>
