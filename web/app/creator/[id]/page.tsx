@@ -10,8 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePrivy } from "@privy-io/react-auth";
 
 // ── Fake Web3 data ────────────────────────────────────────────────────────────
-const FAKE_MARKET_CAP = "₹24.8L";
-const FAKE_TOKEN_PRICE = "₹5.20";
+const FAKE_MARKET_CAP = "1M";
+const FAKE_TOKEN_PRICE = "$10";
 const FAKE_TOKEN_SUPPLY = "10,000";
 const FAKE_TOKEN_HOLDERS = "247";
 const FAKE_ETH_BALANCE = "2.4 ETH";
@@ -464,7 +464,10 @@ export default function CreatorProfilePage() {
 
       <main className="flex-1 w-full">
         {/* ── HERO COVER — full width, Spotify style ──────────────────── */}
-        <div className="relative w-full pt-14" style={{ minHeight: "320px" }}>
+        <div
+          className="relative w-full"
+          style={{ minHeight: "420px", paddingTop: "56px" }}
+        >
           {/* Cover background */}
           <div
             className="absolute inset-0"
@@ -504,13 +507,17 @@ export default function CreatorProfilePage() {
           </div>
 
           {/* Cover content */}
-          <div className="relative max-w-7xl mx-auto px-6 pt-12 pb-0">
-            <div className="flex flex-col md:flex-row items-end gap-6">
+          <div
+            className="relative max-w-7xl mx-auto px-4 pb-8"
+            style={{ paddingTop: "80px" }}
+          >
+            <div className="flex flex-col md:flex-row items-start gap-8">
               {/* Large avatar */}
-              <div className="flex-shrink-0 relative">
+              <div className="flex-shrink-0 relative w-80">
                 <div
-                  className="w-36 h-36 md:w-44 md:h-44 rounded-2xl flex items-center justify-center text-5xl font-bold overflow-hidden"
+                  className="w-full rounded-2xl flex items-center justify-center text-5xl font-bold overflow-hidden"
                   style={{
+                    height: "330px",
                     background: creator.avatar
                       ? "transparent"
                       : "linear-gradient(135deg, #E8B84B, #E8348A)",
@@ -553,7 +560,9 @@ export default function CreatorProfilePage() {
               </div>
 
               {/* Creator info */}
-              <div className="flex-1 min-w-0 pb-6">
+              <div
+                className="flex-1 min-w-0 pb-6"
+              >
                 {/* Verified label */}
                 {creator.isVerified && (
                   <p
@@ -618,7 +627,7 @@ export default function CreatorProfilePage() {
                       label: "Followers",
                       value: formatCount(creator.followersCount || 0),
                     },
-                    { label: "Market Cap", value: FAKE_MARKET_CAP },
+                    { label: "Tokens", value: FAKE_MARKET_CAP },
                     { label: "Token Price", value: FAKE_TOKEN_PRICE },
                   ].map((s, i) => (
                     <div key={s.label}>
@@ -735,7 +744,7 @@ export default function CreatorProfilePage() {
         {/* ── CONTENT AREA ─────────────────────────────────────────────── */}
         <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col lg:flex-row gap-6">
           {/* ── LEFT COLUMN ─────────────────────────────────────────────── */}
-          <div className="w-full lg:w-72 flex-shrink-0 flex flex-col gap-4">
+          <div className="w-full lg:w-80 flex-shrink-0 flex flex-col gap-4">
             {/* Token card */}
             <div
               className="rounded-2xl p-4 overflow-hidden"
@@ -906,29 +915,7 @@ export default function CreatorProfilePage() {
               </div>
             )}
 
-            {!isOwnProfile && (
-              <div
-                className="rounded-2xl p-4"
-                style={{
-                  background: "var(--color-bg-surface)",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                }}
-              >
-                <p
-                  className="text-sm font-semibold mb-1"
-                  style={{ color: "var(--color-text-primary)" }}
-                >
-                  Ethereum Wallet
-                </p>
-                <p
-                  className="text-xs leading-relaxed"
-                  style={{ color: "var(--color-text-secondary)" }}
-                >
-                  {creator.name} has a self-custodial Ethereum wallet. All token
-                  transactions are on-chain and verifiable.
-                </p>
-              </div>
-            )}
+            {/* Ethereum wallet info removed — not needed for public profile */}
 
             {/* Tabs panel */}
             <div
@@ -939,35 +926,35 @@ export default function CreatorProfilePage() {
               }}
             >
               <div
-                className="flex"
+                className="flex gap-1 p-2"
                 style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
               >
                 {(
                   [
-                    { key: "tokens", label: "Balance" },
-                    { key: "transactions", label: "Activity" },
-                    { key: "messages", label: "Messages" },
-                  ] as { key: PanelTab; label: string }[]
+                    { key: "tokens", label: "Balance", icon: "◆" },
+                    { key: "transactions", label: "Activity", icon: "↕" },
+                    { key: "messages", label: "Messages", icon: "✉" },
+                  ] as { key: PanelTab; label: string; icon: string }[]
                 ).map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
-                    className="flex-1 py-3 text-xs font-semibold transition-all"
+                    className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all flex flex-col items-center gap-1"
                     style={{
-                      background: "transparent",
-                      border: "none",
-                      borderBottom:
-                        activeTab === tab.key
-                          ? "2px solid var(--color-accent)"
-                          : "2px solid transparent",
-                      color:
-                        activeTab === tab.key
-                          ? "var(--color-text-primary)"
-                          : "var(--color-text-muted)",
+                      background: activeTab === tab.key
+                        ? "rgba(232,184,75,0.1)"
+                        : "transparent",
+                      border: activeTab === tab.key
+                        ? "1px solid rgba(232,184,75,0.2)"
+                        : "1px solid transparent",
+                      color: activeTab === tab.key
+                        ? "var(--color-accent)"
+                        : "var(--color-text-muted)",
                       cursor: "pointer",
                     }}
                   >
-                    {tab.label}
+                    <span className="text-base leading-none">{tab.icon}</span>
+                    <span>{tab.label}</span>
                   </button>
                 ))}
               </div>
