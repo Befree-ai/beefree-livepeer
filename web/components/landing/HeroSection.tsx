@@ -53,14 +53,16 @@ interface HeroSectionProps {
   onLogin: () => void;
 }
 
-export default function HeroSection({ authenticated, onLogin }: HeroSectionProps) {
+export default function HeroSection({
+  authenticated,
+  onLogin,
+}: HeroSectionProps) {
   return (
     <section className="relative min-h-screen flex flex-col justify-center pt-14 overflow-hidden">
       <OrbBackground />
 
       <div className="relative max-w-7xl mx-auto px-6 py-20 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-
           {/* Left — text */}
           <div>
             <motion.div
@@ -84,7 +86,11 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+              transition={{
+                duration: 0.8,
+                delay: 0.1,
+                ease: [0.25, 0.46, 0.45, 0.94],
+              }}
               className="text-5xl md:text-7xl font-bold mb-6 leading-none tracking-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
@@ -92,7 +98,8 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
               <br />
               <span
                 style={{
-                  background: "linear-gradient(135deg, #E8B84B 0%, #E8348A 100%)",
+                  background:
+                    "linear-gradient(135deg, #E8B84B 0%, #E8348A 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -109,9 +116,9 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
               className="text-lg mb-10 max-w-lg leading-relaxed"
               style={{ color: "var(--color-text-secondary)" }}
             >
-              BeeFree is India's first decentralised creator network.
-              Upload music, go live, earn directly from your fans.
-              No labels. No YouTube cuts. No middlemen.
+              BeeFree is India's first decentralised creator network. Upload
+              music, go live, earn directly from your fans. No labels. No
+              YouTube cuts. No middlemen.
             </motion.p>
 
             <motion.div
@@ -180,7 +187,10 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
                 className="w-2 h-2 rounded-full"
                 style={{ background: "var(--color-pink)" }}
               />
-              <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+              <p
+                className="text-xs"
+                style={{ color: "var(--color-text-muted)" }}
+              >
                 Now in early access · India ·{" "}
                 <span style={{ color: "var(--color-text-secondary)" }}>
                   Be among the first
@@ -193,7 +203,11 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.9, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            transition={{
+              duration: 0.9,
+              delay: 0.2,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
             className="relative hidden lg:block"
           >
             <div
@@ -204,9 +218,11 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
               }}
             >
               {/* Replace with real creator cover photo */}
-              <ImgPlaceholder
-                label="Creator cover photo · 1200×400px"
-                aspect="aspect-[3/1]"
+              <img
+                src="/landing/hero-cover.jpg"
+                alt="Creator cover"
+                className="w-full h-full object-cover"
+                style={{ aspectRatio: "3/1" }}
               />
               <div className="p-5">
                 <div className="flex items-start justify-between mb-4">
@@ -225,13 +241,13 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
                         className="font-semibold text-sm"
                         style={{ color: "var(--color-text-primary)" }}
                       >
-                        Your Name Here
+                        Golshifteh Farahani
                       </p>
                       <p
                         className="text-xs"
                         style={{ color: "var(--color-text-muted)" }}
                       >
-                        @handle · Bollywood · Indie
+                        @golfarhani · Hollywood · Actress
                       </p>
                     </div>
                   </div>
@@ -246,16 +262,16 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
                       className="text-sm font-bold"
                       style={{ color: "var(--color-accent)" }}
                     >
-                      ₹—
+                      $10M
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   {[
-                    { label: "Followers", value: "—" },
-                    { label: "Subscribers", value: "—" },
-                    { label: "Token Price", value: "—" },
+                    { label: "Followers", value: "15.6M" },
+                    { label: "Tokens", value: "1M" },
+                    { label: "Token Price", value: "$10" },
                   ].map((s) => (
                     <div
                       key={s.label}
@@ -295,7 +311,11 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
             {/* Floating — payment */}
             <motion.div
               animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+              transition={{
+                duration: 3.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
               className="absolute -bottom-5 -left-8 px-4 py-3 rounded-xl flex items-center gap-3"
               style={{
                 background: "var(--color-bg-elevated)",
@@ -305,7 +325,10 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
             >
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-                style={{ background: "rgba(29,158,117,0.15)", color: "#1D9E75" }}
+                style={{
+                  background: "rgba(29,158,117,0.15)",
+                  color: "#1D9E75",
+                }}
               >
                 ₹
               </div>
@@ -316,7 +339,10 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
                 >
                   Direct payment
                 </p>
-                <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                <p
+                  className="text-xs"
+                  style={{ color: "var(--color-text-muted)" }}
+                >
                   Fan → Creator · No middleman
                 </p>
               </div>
@@ -325,7 +351,12 @@ export default function HeroSection({ authenticated, onLogin }: HeroSectionProps
             {/* Floating — live */}
             <motion.div
               animate={{ y: [0, 6, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
               className="absolute -top-4 -right-6 px-3 py-2 rounded-xl flex items-center gap-2"
               style={{
                 background: "var(--color-bg-elevated)",

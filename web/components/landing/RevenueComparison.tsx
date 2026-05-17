@@ -106,7 +106,7 @@ export default function RevenueComparison() {
                 style={{ color: "var(--color-text-secondary)" }}
               >
                 BeeFree changes this. Fans pay you directly via UPI or crypto.
-                You keep 92%. Your content lives on decentralised
+                You keep 95%. Your content lives on decentralised
                 infrastructure — nobody can take it down or silence you.
               </p>
             </div>
