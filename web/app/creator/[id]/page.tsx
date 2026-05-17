@@ -975,51 +975,78 @@ export default function CreatorProfilePage() {
               {/* Balance tab */}
               {activeTab === "tokens" && (
                 <div className="p-4">
-                  <div className="grid grid-cols-3 gap-2 mb-4">
+                  <div className="flex flex-col gap-2 mb-4">
                     {[
                       {
-                        label: "ETH",
-                        value: FAKE_ETH_BALANCE.split(" ")[0],
+                        label: "Ethereum",
                         unit: "ETH",
+                        value: "2.4",
+                        change: "+4.2%",
                         color: "#627EEA",
+                        icon: "◆",
                       },
                       {
                         label: "BF Token",
-                        value: "12,400",
                         unit: "BF",
+                        value: "12,400",
+                        change: "+12.4%",
                         color: "var(--color-accent)",
+                        icon: "✦",
                       },
                       {
-                        label: "Creator",
-                        value: "3,200",
+                        label: "Creator Tokens",
                         unit: "tks",
+                        value: "3,200",
+                        change: "+8.1%",
                         color: "#a855f7",
+                        icon: "◈",
                       },
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className="rounded-xl p-2.5 text-center"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
                         style={{
                           background: "rgba(255,255,255,0.03)",
                           border: "1px solid rgba(255,255,255,0.06)",
                         }}
                       >
                         <div
-                          className="w-6 h-6 rounded-full mx-auto mb-2"
-                          style={{ background: item.color }}
-                        />
-                        <p
-                          className="text-sm font-bold"
-                          style={{ color: "var(--color-text-primary)" }}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0"
+                          style={{
+                            background: `${item.color}18`,
+                            color: item.color,
+                          }}
                         >
-                          {item.value}
-                        </p>
-                        <p
-                          className="text-xs"
-                          style={{ color: "var(--color-text-muted)" }}
-                        >
-                          {item.unit}
-                        </p>
+                          {item.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className="text-xs font-semibold"
+                            style={{ color: "var(--color-text-primary)" }}
+                          >
+                            {item.label}
+                          </p>
+                          <p
+                            className="text-xs"
+                            style={{ color: "var(--color-text-muted)" }}
+                          >
+                            {item.unit}
+                          </p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p
+                            className="text-sm font-bold"
+                            style={{ color: "var(--color-text-primary)" }}
+                          >
+                            {item.value}
+                          </p>
+                          <p
+                            className="text-xs font-medium"
+                            style={{ color: "#1D9E75" }}
+                          >
+                            {item.change}
+                          </p>
+                        </div>
                       </div>
                     ))}
                   </div>
