@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { usePrivy } from "@privy-io/react-auth";
 import FadeUp from "@/components/ui/FadeUp";
@@ -52,9 +52,16 @@ export default function EditProfilePage() {
   const [twitter, setTwitter] = useState("");
   const [youtube, setYoutube] = useState("");
   const [subscriptionPrice, setSubscriptionPrice] = useState("");
+
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Avatar upload state
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -66,10 +73,53 @@ export default function EditProfilePage() {
     setTwitter(u.socialLinks?.twitter || "");
     setYoutube(u.socialLinks?.youtube || "");
     setSubscriptionPrice(u.subscriptionPrice ? String(u.subscriptionPrice / 100) : "99");
+    // Set current avatar as preview
+    if (user.avatar) setAvatarPreview(user.avatar);
   }, [user]);
 
   const toggleGenre = (g: string) => {
     setGenre(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g]);
+  };
+
+  // Handle avatar file selection + upload
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+
+    // Upload to Cloudinary via our API
+    setUploadingAvatar(true);
+    setAvatarError(null);
+
+    try {
+      const token = await getAccessToken();
+      if (!token) throw new Error("Not authenticated");
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "avatar");
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Upload failed");
+
+      // Sync user to get updated avatar
+      await syncUser();
+    } catch (err: unknown) {
+      setAvatarError(err instanceof Error ? err.message : "Upload failed");
+      setAvatarPreview(user?.avatar || null);
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleSave = async () => {
@@ -96,6 +146,8 @@ export default function EditProfilePage() {
     }
   };
 
+  const initial = user?.name?.charAt(0)?.toUpperCase() || "?";
+
   return (
     <div className="max-w-2xl">
       <FadeUp>
@@ -116,6 +168,68 @@ export default function EditProfilePage() {
 
       <FadeUp delay={0.05}>
         <div className="flex flex-col gap-6">
+
+          {/* Avatar upload */}
+          <div>
+            <label className="block text-sm font-semibold mb-3"
+              style={{ color: "var(--color-text-primary)" }}>
+              Profile photo
+            </label>
+            <div className="flex items-center gap-5">
+              {/* Avatar preview */}
+              <div
+                className="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold overflow-hidden flex-shrink-0 relative"
+                style={{
+                  background: avatarPreview ? "transparent" : "linear-gradient(135deg, #E8B84B, #E8348A)",
+                  color: "#000",
+                  border: "2px solid rgba(255,255,255,0.1)",
+                }}
+              >
+                {avatarPreview ? (
+                  <img src={avatarPreview} alt="Avatar preview"
+                    className="w-full h-full object-cover" />
+                ) : initial}
+
+                {/* Loading overlay */}
+                {uploadingAvatar && (
+                  <div className="absolute inset-0 flex items-center justify-center"
+                    style={{ background: "rgba(0,0,0,0.6)" }}>
+                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin"
+                      style={{ borderColor: "var(--color-accent)", borderTopColor: "transparent" }} />
+                  </div>
+                )}
+              </div>
+
+              {/* Upload button */}
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="px-4 py-2 rounded-xl text-sm font-medium transition-all mb-1.5"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "transparent",
+                    color: uploadingAvatar ? "var(--color-text-muted)" : "var(--color-text-secondary)",
+                    cursor: uploadingAvatar ? "not-allowed" : "pointer",
+                  }}>
+                  {uploadingAvatar ? "Uploading..." : "Upload photo"}
+                </button>
+                <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  JPG or PNG · Max 5MB
+                </p>
+                {avatarError && (
+                  <p className="text-xs mt-1" style={{ color: "#ef4444" }}>{avatarError}</p>
+                )}
+              </div>
+            </div>
+          </div>
 
           <Field label="Display name">
             <input type="text" value={name} onChange={e => setName(e.target.value)}
