@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         streamKey: s.streamKey,
         playbackId: s.playbackId,
         rtmpIngestUrl: `rtmp://rtmp.livepeer.com/live/${s.streamKey}`,
-        whipUrl: `https://livepeer.studio/webrtc/${s.streamKey}`,
+        whipUrl: `https://playback.livepeer.studio/webrtc/${s.streamKey}`,
         mongoId: stream._id,
       },
     });

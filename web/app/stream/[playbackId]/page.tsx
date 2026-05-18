@@ -205,7 +205,7 @@ export default function StreamViewerPage() {
                 </div>
 
               ) : (
-                <Player.Root src={src} autoPlay lowLatency>
+                <Player.Root src={src} autoPlay lowLatency={false}>
                   <Player.Container style={{ width: "100%", aspectRatio: "16/9", position: "relative", backgroundColor: "black" }}>
                     <Player.Video style={{ width: "100%", height: "100%", objectFit: "contain" }} />
                     <Player.Controls style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "12px 16px", background: "linear-gradient(transparent, rgba(0,0,0,0.8))", display: "flex", alignItems: "center", gap: 12 }}>
