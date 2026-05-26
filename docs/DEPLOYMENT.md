@@ -5,16 +5,13 @@ How to deploy BeeFree to production.
 ---
 
 ## Architecture
-
-```
 GitHub (source code)
-    │
-    ▼
+│
+▼
 Vercel (hosting)
-    │
-    ├── Next.js pages → Vercel CDN (static)
-    └── API routes    → Vercel Serverless Functions
-```
+│
+├── Next.js pages → Vercel CDN (static)
+└── API routes    → Vercel Serverless Functions
 
 Every push to `main` triggers an automatic deployment on Vercel.
 
@@ -27,7 +24,8 @@ Before deploying you need accounts on:
 - MongoDB Atlas (cloud.mongodb.com)
 - Privy (privy.io)
 - Livepeer Studio (livepeer.studio)
-- Razorpay (razorpay.com) — for payments
+- Razorpay (razorpay.com)
+- Cloudinary (cloudinary.com) — for avatar image uploads
 
 ---
 
@@ -36,14 +34,7 @@ Before deploying you need accounts on:
 1. Create a free cluster (M0)
 2. Create a database user with read/write access
 3. **Network Access → Add IP Address → `0.0.0.0/0`**
-   - Vercel functions use dynamic IPs — must allow all
-   - Without this, all DB connections fail in production
 4. Get connection string: `mongodb+srv://user:pass@cluster.mongodb.net/beefree`
-
-**For production (not free tier):**
-- Upgrade to M10 ($57/month) — handles production traffic
-- M0 pauses after ~60 minutes of inactivity
-- M0 has 512MB storage limit
 
 ---
 
@@ -53,11 +44,7 @@ Before deploying you need accounts on:
 2. Settings → App ID → copy `NEXT_PUBLIC_PRIVY_APP_ID`
 3. Settings → App Secret → copy `PRIVY_APP_SECRET`
 4. Settings → Allowed Domains → add your production URL
-5. **For Google OAuth:** Google Cloud Console → OAuth client → Authorized redirect URIs → add `https://auth.privy.io/api/v1/oauth/callback`
-
-**Dev vs Production plan:**
-- Dev plan: max 150 users. Fine for testing.
-- Production plan: $0.05/MAU, required for launch
+5. Enable: Email OTP, SMS OTP, Google OAuth, Embedded Wallets (Ethereum, MPC)
 
 ---
 
@@ -68,8 +55,6 @@ Before deploying you need accounts on:
 3. Developers → Signing Keys → Create Key
    - Copy Private Key immediately (shown ONCE)
    - Copy Public Key
-   - Both are already base64 encoded — use as-is
-
 4. **Webhooks:**
    - Developers → Webhooks → New Webhook
    - URL: `https://your-domain.vercel.app/api/webhooks/livepeer`
@@ -80,50 +65,33 @@ Before deploying you need accounts on:
 ## Step 4 — Razorpay
 
 **Test mode (current):**
-- Dashboard → Settings → API Keys → generate test keys
-- Keys start with `rzp_test_`
+- Dashboard → Settings → API Keys → generate test keys (start with `rzp_test_`)
 
-**Live mode (for real payments):**
+**Live mode:**
 - Complete KYC (PAN, GST, bank account, business details)
-- Dashboard → Settings → API Keys → generate live keys
-- Keys start with `rzp_live_`
-- Add webhook: Settings → Webhooks → `https://your-domain.vercel.app/api/webhooks/razorpay` → event: `payment.captured`
+- Generate live keys (start with `rzp_live_`)
+- Add webhook: `https://your-domain.vercel.app/api/webhooks/razorpay` → event: `payment.captured`
 
 ---
 
-## Step 5 — Vercel
+## Step 5 — Cloudinary
+
+1. Create free account at cloudinary.com
+2. Dashboard → Copy Cloud Name, API Key, API Secret
+3. No additional configuration needed — folder `beefree/avatars` is created automatically on first upload
+
+---
+
+## Step 6 — Vercel
 
 ```bash
 cd /Users/santo/Desktop/work/beefree/web
-npx vercel
-# Follow prompts — link to existing project or create new
+vercel --prod
 ```
-
-Or push to GitHub and import repo at vercel.com.
 
 **Set all environment variables in Vercel dashboard:**
 
-Project → Settings → Environment Variables → add each:
-
-```
-MONGODB_URI
-NEXT_PUBLIC_PRIVY_APP_ID
-PRIVY_APP_SECRET
-LIVEPEER_API_KEY
-LIVEPEER_PRIVATE_KEY
-LIVEPEER_PUBLIC_KEY
-RAZORPAY_KEY_ID
-RAZORPAY_KEY_SECRET
-NEXT_PUBLIC_RAZORPAY_KEY_ID
-NEXT_PUBLIC_APP_URL
-```
-
-**Important for `NEXT_PUBLIC_APP_URL`:** Set to `https://your-domain.vercel.app` (no trailing slash).
-
-After setting env vars, redeploy:
-```bash
-npx vercel --prod
-```
+Project → Settings → Environment Variables
 
 ---
 
@@ -132,91 +100,120 @@ npx vercel --prod
 | Variable | Where to get | Server/Client | Required |
 |----------|-------------|---------------|----------|
 | `MONGODB_URI` | MongoDB Atlas → Connect | Server only | ✅ |
-| `NEXT_PUBLIC_PRIVY_APP_ID` | Privy dashboard → App ID | Both (public) | ✅ |
-| `PRIVY_APP_SECRET` | Privy dashboard → App Secret | Server only | ✅ |
-| `LIVEPEER_API_KEY` | Livepeer Studio → API Keys | Server only | ✅ |
-| `LIVEPEER_PRIVATE_KEY` | Livepeer Studio → Signing Keys | Server only | ✅ |
-| `LIVEPEER_PUBLIC_KEY` | Livepeer Studio → Signing Keys | Server only | ✅ |
-| `RAZORPAY_KEY_ID` | Razorpay → Settings → API Keys | Server only | ✅ |
-| `RAZORPAY_KEY_SECRET` | Razorpay → Settings → API Keys | Server only | ✅ |
-| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Same as RAZORPAY_KEY_ID | Both (public) | ✅ |
-| `NEXT_PUBLIC_APP_URL` | Your production URL | Both (public) | ✅ |
-
-`NEXT_PUBLIC_` prefix = safe to expose in browser bundle. All others = server-side only.
+| `NEXT_PUBLIC_PRIVY_APP_ID` | Privy → App ID | Both | ✅ |
+| `PRIVY_APP_SECRET` | Privy → App Secret | Server only | ✅ |
+| `LIVEPEER_API_KEY` | Livepeer → API Keys | Server only | ✅ |
+| `LIVEPEER_PRIVATE_KEY` | Livepeer → Signing Keys | Server only | ✅ |
+| `LIVEPEER_PUBLIC_KEY` | Livepeer → Signing Keys | Server only | ✅ |
+| `RAZORPAY_KEY_ID` | Razorpay → API Keys | Server only | ✅ |
+| `RAZORPAY_KEY_SECRET` | Razorpay → API Keys | Server only | ✅ |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Same as RAZORPAY_KEY_ID | Both | ✅ |
+| `NEXT_PUBLIC_APP_URL` | Your production URL | Both | ✅ |
+| `ADMIN_EMAIL` | Your admin email | Server only | ✅ |
+| `ADMIN_PRIVY_ID` | Your Privy user ID | Server only | ✅ |
+| `NEXT_PUBLIC_ADMIN_EMAIL` | Your admin email | Both | ✅ |
+| `NEXT_PUBLIC_ADMIN_PRIVY_ID` | Your Privy user ID | Both | ✅ |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary dashboard | Server only | ✅ |
+| `CLOUDINARY_API_KEY` | Cloudinary dashboard | Server only | ✅ |
+| `CLOUDINARY_API_SECRET` | Cloudinary dashboard | Server only | ✅ |
+| `CRON_SECRET` | Any random string | Server only | ✅ |
 
 ---
 
-## Switching to Live Payments
+## Cron Job Setup
 
-Only environment variable changes needed. No code changes.
+BeeFree uses a cron job to expire old subscriptions. Configure in Vercel:
 
-```bash
-# Update these 3 in Vercel dashboard:
-RAZORPAY_KEY_ID=rzp_live_xxx
-RAZORPAY_KEY_SECRET=live_secret_xxx
-NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_live_xxx
+`web/vercel.json`:
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/expire-subscriptions",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
 ```
 
-Then redeploy.
+This runs daily at midnight UTC. The `CRON_SECRET` env var protects the endpoint.
 
 ---
 
-## Making Someone a Creator
+## Creator Application Flow (not manual anymore)
 
-There's no creator registration UI. Do it manually in MongoDB:
+Previously creators were made by manually editing MongoDB. Now:
 
-1. MongoDB Atlas → Browse Collections → users
-2. Find the user by email or name
-3. Click Edit (pencil icon)
-4. Change `role: "fan"` → `role: "creator"`
-5. Click Update
+1. User visits `/apply` and submits application
+2. Admin visits `/admin` page
+3. Admin clicks Approve → user's role is automatically set to `"creator"`
+4. User signs out and back in → Dashboard appears
 
-Next time they log in, they'll see the Dashboard link in the navbar.
+Admin access is controlled by `ADMIN_EMAIL` and `ADMIN_PRIVY_ID` env vars.
+
+---
+
+## Browser Streaming Note
+
+Browser streaming (WebRTC) works on **Brave** and **Firefox**. Chrome sends B-frames which Livepeer WebRTC rejects. For demos and pitch — use Brave browser or OBS.
+
+OBS streaming works on all browsers and is the recommended method for creators:
+- Server: `rtmp://rtmp.livepeer.com/live`
+- Stream Key: from BeeFree dashboard
 
 ---
 
 ## Deployment Checklist
-
-```
 Before launch:
-  □ MongoDB Atlas network: 0.0.0.0/0 allowed
-  □ MongoDB Atlas: M10 or higher (not M0)
-  □ Privy: production plan (not dev — 150 user limit)
-  □ Privy: production domain added to allowed domains
-  □ Livepeer: webhook configured (URL + 4 events)
-  □ Razorpay: KYC complete
-  □ Razorpay: live keys in Vercel env vars
-  □ Razorpay: webhook URL configured
-  □ Vercel: all env vars set
-  □ NEXT_PUBLIC_APP_URL: set to production URL
-  □ Google OAuth: production domain added (if using Google login)
-
+□ MongoDB Atlas: 0.0.0.0/0 network access allowed
+□ MongoDB Atlas: M10 or higher (not M0)
+□ Privy: production plan (150 user limit on dev)
+□ Privy: production domain added to allowed domains
+□ Livepeer: webhook configured (URL + 4 events)
+□ Razorpay: KYC complete for live keys
+□ Razorpay: webhook URL configured
+□ Cloudinary: account created, keys in Vercel
+□ Vercel: all env vars set
+□ NEXT_PUBLIC_APP_URL: set to production URL
+□ ADMIN_EMAIL + ADMIN_PRIVY_ID: set correctly
+□ vercel.json: cron job configured
+□ CRON_SECRET: set in Vercel env vars
 After launch:
-  □ Test login with each method (email, SMS, Google)
-  □ Test video upload
-  □ Test free video playback
-  □ Test premium video (subscribe + watch)
-  □ Test livestream (browser + OBS)
-  □ Test premium stream access control
-  □ Test subscription payment end-to-end with real card
-  □ Test Razorpay webhook by checking MongoDB after payment
-```
+□ Test login (email, SMS, Google)
+□ Test creator application → admin approval
+□ Test avatar upload (Cloudinary)
+□ Test video upload + playback
+□ Test free video
+□ Test premium video (subscribe + watch)
+□ Test livestream (Brave browser + OBS)
+□ Test follow/unfollow
+□ Test subscription payment end-to-end
+□ Test cron job (expire-subscriptions endpoint)
 
 ---
 
 ## Common Production Issues
 
-### "MongoServerSelectionError: ReplicaSetNoPrimary"
-MongoDB Atlas M0 paused due to inactivity. Go to cloud.mongodb.com → Clusters → Resume. Upgrade to M10 to prevent this.
+### "MongoServerSelectionError"
+MongoDB Atlas M0 paused. Go to cloud.mongodb.com → Resume. Upgrade to M10 to prevent.
 
 ### "Authentication failed" on all API calls
-`PRIVY_APP_SECRET` or `NEXT_PUBLIC_PRIVY_APP_ID` is wrong or not set in Vercel. Check Vercel → Project → Settings → Environment Variables.
+`PRIVY_APP_SECRET` or `NEXT_PUBLIC_PRIVY_APP_ID` wrong in Vercel.
 
 ### Videos stuck at "processing"
-Livepeer webhook not configured. Go to Livepeer Studio → Developers → Webhooks → verify the URL and events.
+Livepeer webhook not configured. Check Livepeer Studio → Developers → Webhooks.
+
+### Avatar upload fails in production
+`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, or `CLOUDINARY_API_SECRET` not set in Vercel.
+
+### Admin page shows "Access denied"
+`NEXT_PUBLIC_ADMIN_EMAIL` or `NEXT_PUBLIC_ADMIN_PRIVY_ID` not set, or doesn't match logged-in user.
+
+### Stream shows Idle in Livepeer dashboard
+Using Chrome for browser streaming — Chrome sends B-frames which fail. Switch to Brave or use OBS.
 
 ### Payments work but subscriptions not activating
-`RAZORPAY_KEY_SECRET` mismatch. The signature verification fails silently. Check Vercel logs for "[Verify] Signature mismatch".
+`RAZORPAY_KEY_SECRET` mismatch. Signature verification fails silently.
 
-### Premium videos show 401 in production but work locally
-`LIVEPEER_PRIVATE_KEY` or `LIVEPEER_PUBLIC_KEY` not set in Vercel, or missing `==` padding at end of base64 string.
+### Premium videos show 401 in production
+`LIVEPEER_PRIVATE_KEY` or `LIVEPEER_PUBLIC_KEY` not set in Vercel, or missing `==` padding.
