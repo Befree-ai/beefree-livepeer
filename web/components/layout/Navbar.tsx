@@ -42,20 +42,12 @@ export default function Navbar() {
               >
                 Explore
               </Link>
-              {user?.role === "creator" && (
+              {authenticated && (
                 <Link
                   href="/dashboard"
                   className="text-sm px-3 py-1.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-elevated transition-all"
                 >
                   Dashboard
-                </Link>
-              )}
-              {user?.role === "fan" && (
-                <Link
-                  href="/apply"
-                  className="text-sm px-3 py-1.5 rounded-md text-accent hover:bg-accent/10 transition-all"
-                >
-                  Become a Creator
                 </Link>
               )}
             </>
@@ -193,7 +185,7 @@ export default function Navbar() {
             Explore
           </Link>
 
-          {authenticated && user?.role === "creator" && (
+          {authenticated && (
             <>
               <Link
                 href="/dashboard"
@@ -231,16 +223,6 @@ export default function Navbar() {
                 Edit Profile
               </Link>
             </>
-          )}
-
-          {authenticated && user?.role === "fan" && (
-            <Link
-              href="/apply"
-              onClick={() => setMenuOpen(false)}
-              className="text-sm px-3 py-2.5 rounded-lg text-accent hover:bg-bg-elevated transition-all"
-            >
-              Become a Creator
-            </Link>
           )}
 
           <div className="h-px bg-border my-1" />

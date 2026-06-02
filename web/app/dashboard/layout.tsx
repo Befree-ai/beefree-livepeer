@@ -89,7 +89,7 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!ready) return
     if (!authenticated) { router.push('/'); return }
-    if (user && user.role !== 'creator') router.push('/explore')
+    // if (user && user.role !== 'creator') router.push('/explore')
   }, [ready, authenticated, user, router])
 
   if (!ready || !authenticated || !user) {

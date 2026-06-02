@@ -40,12 +40,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 3: Must be a creator
-    if (user.role !== "creator") {
-      return NextResponse.json<ApiResponse>(
-        { success: false, error: "Only creators can upload videos" },
-        { status: 403 },
-      );
-    }
+    // if (user.role !== "creator") {
+    //   return NextResponse.json<ApiResponse>(
+    //     { success: false, error: "Only creators can upload videos" },
+    //     { status: 403 },
+    //   );
+    // }
 
     // Step 4: Parse request body
     const body = await req.json();

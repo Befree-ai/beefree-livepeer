@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const user = await User.findOne({ privyId: verifiedClaims.userId });
 
-    if (!user || user.role !== "creator") {
+    if (!user) {
       return NextResponse.json<ApiResponse>(
         { success: false, error: "Only creators can create streams" },
         { status: 403 },
