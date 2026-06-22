@@ -1,14 +1,14 @@
-# BeeFree
+# LyveFree
 
 **India-first decentralised creator platform. Artists keep 92–95% of what they earn.**
 
-YouTube pays creators ~55% of revenue. Spotify pays fractions of a cent per stream. BeeFree flips this — creators set their own subscription price, fans pay directly, and the creator keeps almost everything.
+YouTube pays creators ~55% of revenue. Spotify pays fractions of a cent per stream. LyveFree flips this — creators set their own subscription price, fans pay directly, and the creator keeps almost everything.
 
 ---
 
-## What BeeFree Does
+## What LyveFree Does
 
-BeeFree lets music artists and creators:
+LyveFree lets music artists and creators:
 
 - **Upload videos** — free or premium (subscribers only)
 - **Go live** — browser-based or OBS, free or premium streams
@@ -119,7 +119,7 @@ beefree/
 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for full checklist.
 
-<!-- # BeeFree — Technical Documentation
+<!-- # LyveFree — Technical Documentation
 
 ## Stack
 

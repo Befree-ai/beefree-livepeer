@@ -84,7 +84,7 @@ return {
 
 Creator sets up OBS:
 - Server: `rtmp://rtmp.livepeer.com/live`
-- Stream Key: shown in BeeFree dashboard
+- Stream Key: shown in LyveFree dashboard
 
 OBS → RTMP → Livepeer. Works on all browsers. Recommended for professional streaming.
 

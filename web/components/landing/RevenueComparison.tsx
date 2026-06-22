@@ -9,7 +9,7 @@ const PLATFORMS = [
   { label: "Spotify", creatorGets: 30, delay: 0.1 },
   { label: "YouTube", creatorGets: 55, delay: 0.2 },
   { label: "Patreon", creatorGets: 88, delay: 0.3 },
-  { label: "BeeFree", creatorGets: 95, delay: 0.4 },
+  { label: "LyveFree", creatorGets: 95, delay: 0.4 },
 ];
 
 function RevenueBar({
@@ -23,14 +23,14 @@ function RevenueBar({
 }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true });
-  const isBeeFree = label === "BeeFree";
+  const isLyveFree = label === "LyveFree";
 
   return (
     <div ref={ref} className="flex items-center gap-4">
       <p
         className="text-sm w-20 flex-shrink-0 text-right font-medium"
         style={{
-          color: isBeeFree
+          color: isLyveFree
             ? "var(--color-accent)"
             : "var(--color-text-muted)",
         }}
@@ -51,7 +51,7 @@ function RevenueBar({
             ease: [0.25, 0.46, 0.45, 0.94],
           }}
           style={{
-            background: isBeeFree
+            background: isLyveFree
               ? "linear-gradient(90deg, rgba(232,184,75,0.7), rgba(232,184,75,1))"
               : "rgba(255,255,255,0.07)",
           }}
@@ -59,7 +59,7 @@ function RevenueBar({
           <span
             className="text-xs font-semibold"
             style={{
-              color: isBeeFree ? "#000" : "var(--color-text-secondary)",
+              color: isLyveFree ? "#000" : "var(--color-text-secondary)",
               whiteSpace: "nowrap",
             }}
           >
@@ -105,7 +105,7 @@ export default function RevenueComparison() {
                 className="leading-relaxed"
                 style={{ color: "var(--color-text-secondary)" }}
               >
-                BeeFree changes this. Fans pay you directly via UPI or crypto.
+                LyveFree changes this. Fans pay you directly via UPI or crypto.
                 You keep 95%. Your content lives on decentralised
                 infrastructure — nobody can take it down or silence you.
               </p>
@@ -121,7 +121,7 @@ export default function RevenueComparison() {
                 className="text-xs mt-2"
                 style={{ color: "var(--color-text-muted)" }}
               >
-                * BeeFree takes 5–8%. Razorpay payment processing ~2%.
+                * LyveFree takes 5–8%. Razorpay payment processing ~2%.
               </p>
             </div>
           </FadeUp>

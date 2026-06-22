@@ -6,7 +6,7 @@ How users sign up, log in, and how their identity is verified on every API reque
 
 ## Overview
 
-BeeFree uses **Privy** for authentication. Privy handles the login UI, OTP delivery, Google OAuth, and JWT issuance. We never store passwords. After login, Privy gives us a JWT token which we verify on our backend to identify the user.
+LyveFree uses **Privy** for authentication. Privy handles the login UI, OTP delivery, Google OAuth, and JWT issuance. We never store passwords. After login, Privy gives us a JWT token which we verify on our backend to identify the user.
 
 ---
 
@@ -176,7 +176,7 @@ export function useAuth(): UseAuthReturn {
 ```
 
 **Why do we sync to MongoDB?**
-Privy knows the user's identity (who they are) but knows nothing about BeeFree-specific data (their role, bio, subscription price, etc.). MongoDB is where all BeeFree-specific user data lives.
+Privy knows the user's identity (who they are) but knows nothing about LyveFree-specific data (their role, bio, subscription price, etc.). MongoDB is where all LyveFree-specific user data lives.
 
 **Name extraction logic:**
 - Google login → use Google display name (e.g. "Om Santoshwar")
@@ -322,7 +322,7 @@ fetch('/api/some-route', {
 There is no "become a creator" flow in the UI. Roles are assigned manually:
 
 1. User signs up → `role: "fan"` in MongoDB
-2. BeeFree team goes to MongoDB Atlas
+2. LyveFree team goes to MongoDB Atlas
 3. Finds the user document
 4. Changes `role: "fan"` → `role: "creator"`
 

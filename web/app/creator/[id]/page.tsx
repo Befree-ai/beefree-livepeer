@@ -308,7 +308,7 @@ export default function CreatorProfilePage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount,
         currency: "INR",
-        name: "BeeFree",
+        name: "LyveFree",
         description: `Subscribe to ${creator?.name}`,
         order_id: orderId,
         handler: async (response: {

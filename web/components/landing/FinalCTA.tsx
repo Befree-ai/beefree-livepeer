@@ -69,7 +69,7 @@ export default function FinalCTA({ onLogin }: FinalCTAProps) {
                     cursor: "pointer",
                   }}
                 >
-                  Join BeeFree free →
+                  Join LyveFree free →
                 </button>
                 <Link href="/apply">
                   <button

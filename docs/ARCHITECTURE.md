@@ -1,4 +1,4 @@
-# BeeFree — Technical Architecture
+# LyveFree — Technical Architecture
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@
 
 ## System Overview
 
-BeeFree is a Next.js 16 application deployed on Vercel. It uses the App Router pattern where:
+LyveFree is a Next.js 16 application deployed on Vercel. It uses the App Router pattern where:
 
 - **Pages** (`app/*/page.tsx`) — React components that run in the browser
 - **API routes** (`app/api/*/route.ts`) — serverless functions that run on Vercel's servers
@@ -179,7 +179,8 @@ One collection for both fans and creators. Creator-specific fields are empty for
   role: "fan" | "creator"          // INDEXED — queried frequently
   bio?: string                     // max 500 chars
   isBanned: boolean
-  isVerified: boolean              // set manually by BeeFree team (shows verified badge)
+  isVerified: boolean              // set manually by LyveFree
+  // team (shows verified badge)
   walletAddress?: string           // Ethereum wallet address from Privy MPC
 
   // Follow system

@@ -6,19 +6,19 @@ const STACK = [
   {
     name: "Livepeer",
     role: "Decentralised video infrastructure",
-    desc: "All video on BeeFree is stored and streamed via Livepeer — a decentralised network of thousands of independent nodes. No single entity can censor, remove, or demonetise your content.",
+    desc: "All video on LyveFree is stored and streamed via Livepeer — a decentralised network of thousands of independent nodes. No single entity can censor, remove, or demonetise your content.",
     icon: "▶",
   },
   {
     name: "Ethereum",
     role: "Smart contracts & tokens",
-    desc: "Creator tokens, revenue splits, and governance will run on Ethereum smart contracts — transparent, unstoppable, and owned by the community. Not by BeeFree.",
+    desc: "Creator tokens, revenue splits, and governance will run on Ethereum smart contracts — transparent, unstoppable, and owned by the community. Not by LyveFree.",
     icon: "◆",
   },
   {
     name: "Privy MPC",
     role: "Self-custodial wallets",
-    desc: "Every BeeFree user gets a real Ethereum wallet using MPC technology. No seed phrases. No complexity. You own your keys — export to MetaMask or any wallet, anytime.",
+    desc: "Every LyveFree user gets a real Ethereum wallet using MPC technology. No seed phrases. No complexity. You own your keys — export to MetaMask or any wallet, anytime.",
     icon: "◉",
   },
 ];

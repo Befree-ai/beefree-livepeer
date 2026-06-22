@@ -103,7 +103,7 @@ export default function CreatorSpotlight() {
                 className="text-sm"
                 style={{ color: "var(--color-text-muted)" }}
               >
-                Apply to join BeeFree early access and start earning
+                Apply to join LyveFree early access and start earning
                 directly from your fans.
               </p>
             </div>

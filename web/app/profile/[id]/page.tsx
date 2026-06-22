@@ -168,7 +168,7 @@ export default function FanProfilePage() {
                   <div>
                     <h2 className="font-bold text-base mb-0.5"
                       style={{ fontFamily: "var(--font-display)", color: "var(--color-text-primary)" }}>
-                      Your BeeFree Wallet
+                      Your LyveFree Wallet
                     </h2>
                     <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
                       Self-custodial Ethereum wallet — fully owned by you

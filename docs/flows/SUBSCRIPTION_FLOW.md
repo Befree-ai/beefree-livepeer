@@ -6,7 +6,7 @@ How a fan pays to subscribe to a creator — from clicking "Subscribe" to unlock
 
 ## Overview
 
-BeeFree uses Razorpay for payments. Each creator sets their own monthly subscription price. There are no free trials and no grace periods — access is immediate after payment and ends exactly 30 days later.
+LyveFree uses Razorpay for payments. Each creator sets their own monthly subscription price. There are no free trials and no grace periods — access is immediate after payment and ends exactly 30 days later.
 
 The payment flow involves 5 actors:
 1. **Fan's browser** — clicks subscribe, opens checkout, sends payment details
@@ -138,7 +138,7 @@ const handleSubscribe = async () => {
     key:      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
     amount,                    // in paise
     currency: 'INR',
-    name:     'BeeFree',
+    name:     'LyveFree',
     description: `Subscribe to ${creator?.name}`,
     order_id: orderId,         // from Step A
     handler: async (response) => {
@@ -245,7 +245,7 @@ Razorpay's API requires receipt to be max 40 characters. We learned this the har
 ### Step 5 — Fan Pays via Razorpay Checkout
 
 The Razorpay checkout popup opens. The fan sees:
-- BeeFree branding
+- LyveFree branding
 - Amount: ₹199 (or whatever the creator set)
 - Payment options: UPI, debit/credit card, netbanking, wallet
 

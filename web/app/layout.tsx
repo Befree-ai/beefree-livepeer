@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BeeFree — Music for the free",
+  title: "LyveFree — Music for the free",
   description: "India-first creator platform. Artists keep 95% of revenue.",
 };
 

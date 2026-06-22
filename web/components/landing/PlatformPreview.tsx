@@ -32,7 +32,7 @@ export default function PlatformPreview() {
               className="text-3xl md:text-5xl font-bold mb-4"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              See BeeFree in action.
+              See LyveFree in action.
             </h2>
             <p
               className="text-lg max-w-xl mx-auto"

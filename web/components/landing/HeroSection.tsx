@@ -116,7 +116,7 @@ export default function HeroSection({
               className="text-lg mb-10 max-w-lg leading-relaxed"
               style={{ color: "var(--color-text-secondary)" }}
             >
-              BeeFree is India's first decentralised creator network. Upload
+              LyveFree is India's first decentralised creator network. Upload
               music, go live, earn directly from your fans. No labels. No
               YouTube cuts. No middlemen.
             </motion.p>
@@ -153,7 +153,7 @@ export default function HeroSection({
                       cursor: "pointer",
                     }}
                   >
-                    Join BeeFree free →
+                    Join LyveFree free →
                   </button>
                   <Link href="/explore">
                     <button

@@ -23,7 +23,7 @@ export default function Navbar() {
           href="/"
           className="font-display text-lg font-semibold text-text-primary"
         >
-          BeeFree
+          LyveFree
         </Link>
 
         {/* Desktop nav */}

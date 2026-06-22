@@ -9,7 +9,7 @@ const TOKENS = [
     color: "var(--color-accent)",
     colorBg: "rgba(232,184,75,0.06)",
     colorBorder: "rgba(232,184,75,0.15)",
-    desc: "Platform membership token. Grants access to the BeeFree network and gives holders governance rights to co-create the platform's future.",
+    desc: "Platform membership token. Grants access to the LyveFree network and gives holders governance rights to co-create the platform's future.",
   },
   {
     name: "Creator Token",
@@ -25,7 +25,7 @@ const TOKENS = [
     color: "#1D9E75",
     colorBg: "rgba(29,158,117,0.06)",
     colorBorder: "rgba(29,158,117,0.15)",
-    desc: "Powers network activity. Earned by uploading, sharing, and inviting. The more you contribute to BeeFree, the more you receive.",
+    desc: "Powers network activity. Earned by uploading, sharing, and inviting. The more you contribute to LyveFree, the more you receive.",
   },
 ];
 
@@ -54,7 +54,7 @@ export default function TokenEconomy() {
               className="text-lg max-w-xl mx-auto mb-4"
               style={{ color: "var(--color-text-secondary)" }}
             >
-              BeeFree is building a tokenised creator economy — where fans
+              LyveFree is building a tokenised creator economy — where fans
               own a piece of the artists they love.
             </p>
             <span

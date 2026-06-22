@@ -84,7 +84,7 @@ export default function StreamViewerPage() {
       await loadRazorpayScript();
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount, currency: "INR", name: "BeeFree",
+        amount, currency: "INR", name: "LyveFree",
         description: `Subscribe to ${creatorName}`,
         order_id: orderId,
         handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {

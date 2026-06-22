@@ -1,6 +1,6 @@
 # Deployment
 
-How to deploy BeeFree to production.
+How to deploy LyveFree to production.
 
 ---
 
@@ -122,7 +122,7 @@ Project → Settings → Environment Variables
 
 ## Cron Job Setup
 
-BeeFree uses a cron job to expire old subscriptions. Configure in Vercel:
+LyveFree uses a cron job to expire old subscriptions. Configure in Vercel:
 
 `web/vercel.json`:
 ```json
@@ -159,7 +159,7 @@ Browser streaming (WebRTC) works on **Brave** and **Firefox**. Chrome sends B-fr
 
 OBS streaming works on all browsers and is the recommended method for creators:
 - Server: `rtmp://rtmp.livepeer.com/live`
-- Stream Key: from BeeFree dashboard
+- Stream Key: from LyveFree dashboard
 
 ---
 
