@@ -253,7 +253,7 @@ export default function ExplorePage() {
                 No creators yet.
               </p>
               <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)' }}>
-                Be the first artist on LyveFree.
+                Be the first artist on BeFree.
               </p>
               <Link href="/apply">
                 <button

@@ -125,7 +125,7 @@ export default function AdminPage() {
               Access denied.
             </p>
             <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-              This page is only for LyveFree admins.
+              This page is only for BeFree admins.
             </p>
           </div>
         </main>
@@ -148,7 +148,7 @@ export default function AdminPage() {
               </p>
               <h1 className="text-3xl font-bold"
                 style={{ fontFamily: "var(--font-display)", color: "var(--color-text-primary)" }}>
-                LyveFree Control Panel
+                BeFree Control Panel
               </h1>
             </div>
           </FadeUp>

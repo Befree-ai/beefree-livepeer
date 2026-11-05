@@ -235,7 +235,7 @@ export default function DashboardPage() {
                     color: "var(--color-text-primary)",
                   }}
                 >
-                  Your LyveFree Wallet
+                  Your BeFree Wallet
                 </h2>
                 <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
                   Self-custodial Ethereum wallet — fully owned by you
